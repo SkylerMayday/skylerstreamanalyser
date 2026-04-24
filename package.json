@@ -1,0 +1,15 @@
+{
+  "name": "vod-desk",
+  "version": "2.0.0",
+  "description": "Stream Analyser — Twitch VOD analysis tool",
+  "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  }
+}
