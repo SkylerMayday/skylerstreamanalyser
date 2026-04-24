@@ -172,11 +172,7 @@ async function getVODPlaylistURL(vodId) {
   return url;
 }
 async function fetchText(url) {
-  const proxyUrl = getProxyUrl();
-  const fetchUrl = proxyUrl
-    ? `${proxyUrl}/proxy?url=${encodeURIComponent(url)}`
-    : url;
-  const r = await fetch(fetchUrl, { mode: 'cors' });
+  const r = await fetch(`/proxy?url=${encodeURIComponent(url)}`);
   if (!r.ok) throw new Error('fetch failed ' + r.status);
   return r.text();
 }
@@ -186,9 +182,8 @@ async function fetchBytes(url) {
   return new Uint8Array(await r.arrayBuffer());
 }
 
-// Get the configured proxy URL from localStorage, or null if not set
 function getProxyUrl() {
-  return ''; // Post-Railway: proxy is always at the same origin
+  return '';
 }
 
 function parseMasterPlaylist(text) {
