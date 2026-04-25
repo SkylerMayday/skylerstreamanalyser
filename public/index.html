@@ -1508,6 +1508,7 @@
               <svg class="chat-chart" id="chat-chart" viewBox="0 0 800 140" preserveAspectRatio="none"></svg>
             </div>
             <div id="benchmark-card" style="display:none; margin-top: 18px;"></div>
+            <div id="bitrate-card" style="display:none; margin-top: 14px;"></div>
             <div id="ai-metrics-card" style="display:none; margin-top: 14px;"></div>
             <ul class="feedback-list" id="feedback-list" style="margin-top: 12px;"></ul>
             <div id="improvement-notes-panel" style="display:none; margin-top: 4px;"></div>
@@ -1626,6 +1627,18 @@
           <p class="subtitle">How consistently you stream on the same days and at similar times, based on your last 20 VODs.</p>
           <div id="channel-schedule-content" style="margin-top:14px;"></div>
         </div>
+        <!-- Subscriber metrics card -->
+        <div class="card" id="channel-subs-card">
+          <h2>Subscribers</h2>
+          <p class="subtitle">Current subscriber count and tier breakdown for your channel.</p>
+          <div class="stats-grid" id="channel-subs-grid" style="margin-top:14px;"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+        </div>
+        <!-- Bits card -->
+        <div class="card" id="channel-bits-card">
+          <h2>Bits</h2>
+          <p class="subtitle">Total bits received and your top cheerers.</p>
+          <div id="channel-bits-content" style="margin-top:14px;"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+        </div>
         <!-- Channel Description Analysis -->
         <div class="card" id="channel-desc-card">
           <h2>Channel description analysis</h2>
@@ -1640,6 +1653,61 @@
             <button class="primary" id="desc-analysis-btn">Analyse description</button>
           </div>
           <div id="desc-analysis-result" style="margin-top: 16px; display:none;"></div>
+        </div>
+        <!-- Discoverability audit card -->
+        <div class="card" id="channel-discoverability-card">
+          <h2>✦ Discoverability audit</h2>
+          <p class="subtitle">AI review of your channel title, category, tags, and description against Twitch discoverability best practices.</p>
+          <div id="channel-discoverability-content">
+            <button class="ghost" id="run-discoverability-btn">Run audit</button>
+          </div>
+        </div>
+        <!-- Community protection card -->
+        <div class="card" id="channel-protection-card">
+          <h2>Community protection</h2>
+          <p class="subtitle">Hype train optimisation, hate raid defence, and bot removal — tools and tactics.</p>
+          <div id="channel-protection-content">
+            <div style="display:grid;gap:16px;margin-top:4px;">
+
+              <!-- Hype Train -->
+              <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:16px;">
+                <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🚂 Hype Train optimisation</div>
+                <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Hype Trains trigger when multiple bits cheers or new subs happen in quick succession. They boost your channel visibility on the Twitch home page during the event.</p>
+                <div style="font-size:13px;color:var(--ink-2);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--ink);">How to trigger more hype trains:</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Run <strong>sub goals or sub hype</strong> segments — announce a threshold ("if we hit 5 new subs in 10 min I'll do X") to create momentum</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Use <strong>channel points</strong> redeems tied to bits to encourage smaller cheers to cluster</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Call out every cheer and sub by name immediately — social proof drives more of the same behaviour</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Set a <strong>Hype Train cooldown</strong> in Creator Dashboard → Monetisation → Hype Train (min 1 hour between trains)</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>During peak moments (high chat activity), verbally prompt — "if anyone's been thinking about subbing, now's the time"</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hate Raid + Bots -->
+              <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:16px;">
+                <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🛡️ Hate raid defence &amp; bot removal</div>
+                <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Hate raids send waves of bots or hostile accounts into your chat. Set these up before you need them — mid-raid is too late.</p>
+                <div style="font-size:13px;color:var(--ink-2);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--ink);">Built-in Twitch tools:</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+                    <div style="display:flex;gap:8px;"><span style="color:var(--success);font-weight:700;">✓</span><span><strong>Shield Mode</strong> — one-click lockdown (Creator Dashboard → Safety → Shield Mode). Restricts chat to followers/subs only and activates AutoMod at max level. Toggle it the moment a raid starts.</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--success);font-weight:700;">✓</span><span><strong>AutoMod</strong> — enable in Creator Dashboard → Safety → AutoMod. Set to level 3+ for harassment/hate speech categories.</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--success);font-weight:700;">✓</span><span><strong>Follower-only mode</strong> with a minimum follow age (10–30 min) — most bot accounts are brand new. Set it under Chat Settings → Follower-only mode.</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--success);font-weight:700;">✓</span><span><strong>Suspicious user detection</strong> — enable in Creator Dashboard → Safety. Twitch auto-flags accounts that match known bot patterns.</span></div>
+                  </div>
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--ink);">Third-party tools:</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span><a href="https://twitch.center/consolelog" target="_blank">Commander Root's Ban List</a> — community-maintained block list of known hate-raid bot accounts. Import directly via Twitch's ban import tool.</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span><a href="https://www.twitch.tv/dashboard/safety/bans" target="_blank">Twitch ban list import</a> — paste a list of usernames to mass-ban. Use after a raid to clean up.</span></div>
+                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span><strong>Streamlabs/StreamElements bots</strong> — if you already use either, configure their spam filters and follower-age gates in their dashboard.</span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1875,7 +1943,7 @@ const REDIRECT_URI = (function() {
   }
   return 'http://localhost';
 })();
-const SCOPES = 'user:read:email';
+const SCOPES = 'user:read:email channel:read:subscriptions bits:read';
 const IS_HOSTED = window.location.protocol === 'https:' || window.location.protocol === 'http:';
 
 // Sign-in button: if no Client ID configured, prompt to set one. Otherwise start OAuth.
@@ -2467,14 +2535,29 @@ function renderBenchmarkCard(meta, comments, clips) {
   const peak = Math.max(...bins, 0);
   const peakMeanRatio = mean > 0 ? peak / mean : 0;
 
+  // Sub / VIP / mod share in chat
+  const subMsgs  = comments.filter(c => c.isSubscriber).length;
+  const modMsgs  = comments.filter(c => c.isMod).length;
+  const vipMsgs  = comments.filter(c => c.isVIP).length;
+  const subPct   = comments.length > 0 ? (subMsgs / comments.length) * 100 : 0;
+
+  // Cold open: first 5 minutes
+  const coldOpen = comments.filter(c => c.t < 300);
+  const coldCpm  = coldOpen.length / 5; // msgs per minute over first 5min
+
+  // Outro: last 5 minutes
+  const outroStart = Math.max(0, dur - 300);
+  const outro = comments.filter(c => c.t >= outroStart);
+  const outroCpm  = outro.length / 5;
+
+  // Pacing: longest consecutive dead-air run (minutes with < 2 msgs)
+  let maxDeadRun = 0, curRun = 0;
+  bins.forEach(b => { if (b < 2) { curRun++; maxDeadRun = Math.max(maxDeadRun, curRun); } else curRun = 0; });
+
+  // Clip creation rate from Helix (passed in via meta if fetched)
+  const twitchClipCount = meta.twitchClipCount ?? null;
+
   // ---- Reference table rows ----
-  // Each row: [metric label, your value (formatted), status, ranges text]
-  function durStatus(s) {
-    if (s < 30 * 60)   return 'warn';
-    if (s > 8 * 3600)  return 'warn';
-    if (s >= 90 * 60 && s <= 4 * 3600) return 'ok';
-    return 'dim';
-  }
   function cpmStatus(v) {
     if (v < 1)   return 'bad';
     if (v < 3)   return 'warn';
@@ -2493,10 +2576,25 @@ function renderBenchmarkCard(meta, comments, clips) {
     return 'dim';
   }
   function peakStatus(v) {
-    if (v < 2)  return 'warn'; // flat — no spikes
-    if (v > 12) return 'warn'; // one huge spike, flat everywhere else
+    if (v < 2)  return 'warn';
+    if (v > 12) return 'warn';
     if (v >= 3 && v <= 8) return 'ok';
     return 'dim';
+  }
+  function subPctStatus(v) {
+    if (v >= 30) return 'ok';
+    if (v >= 10) return 'dim';
+    return 'warn';
+  }
+  function coldOpenStatus(v) {
+    if (v >= 3) return 'ok';
+    if (v >= 1) return 'dim';
+    return 'warn';
+  }
+  function pacingStatus(v) { // longest dead run in minutes
+    if (v <= 5)  return 'ok';
+    if (v <= 15) return 'dim';
+    return 'warn';
   }
 
   const rows = [
@@ -2513,6 +2611,34 @@ function renderBenchmarkCard(meta, comments, clips) {
       status: deadStatus(deadPct),
       ranges: '< 15% excellent · 15–25% normal · 25–50% notable · 50%+ problematic',
       note: 'Minutes with < 2 messages. VOD retention drops sharply through quiet stretches.',
+    },
+    {
+      label: 'Longest dead stretch',
+      value: maxDeadRun + ' min',
+      status: pacingStatus(maxDeadRun),
+      ranges: '≤ 5 min fine · 6–15 notable · 15+ problematic',
+      note: 'Longest consecutive run of near-silent minutes. Even one 20-min lull can bleed casual viewers.',
+    },
+    {
+      label: 'Cold open (first 5 min)',
+      value: coldCpm.toFixed(1) + ' msg/min',
+      status: coldOpenStatus(coldCpm),
+      ranges: '< 1 weak · 1–3 average · 3+ strong',
+      note: 'First impression matters most for VOD retention. Low cold-open chat usually means the stream started slowly.',
+    },
+    {
+      label: 'Outro (last 5 min)',
+      value: outroCpm.toFixed(1) + ' msg/min',
+      status: coldOpenStatus(outroCpm),
+      ranges: '< 1 weak · 1–3 average · 3+ strong',
+      note: 'A strong outro keeps viewers around for the raid and leaves a good final impression.',
+    },
+    {
+      label: 'Subscriber chat share',
+      value: subPct.toFixed(0) + '% of msgs',
+      status: subPctStatus(subPct),
+      ranges: '< 10% low · 10–30% typical · 30%+ loyal community',
+      note: `${nFmt(subMsgs)} sub msgs · ${nFmt(modMsgs)} mod · ${nFmt(vipMsgs)} VIP. High sub share means your community is invested.`,
     },
     {
       label: 'Unique / total chatters',
@@ -2535,6 +2661,13 @@ function renderBenchmarkCard(meta, comments, clips) {
       ranges: '0–1 sparse · 2–4 moderate · 5+ rich',
       note: 'Based on chat velocity + hype keyword scoring. Rough proxy — audio peaks included when proxy is active.',
     },
+    ...(twitchClipCount !== null ? [{
+      label: 'Clips made by viewers',
+      value: twitchClipCount + ' clip' + (twitchClipCount !== 1 ? 's' : ''),
+      status: twitchClipCount >= 5 ? 'ok' : twitchClipCount >= 1 ? 'dim' : 'warn',
+      ranges: '0 none · 1–4 some · 5+ viral potential',
+      note: 'Clips created by viewers during this VOD via Twitch's clip button. High clip rate = moments that resonated.',
+    }] : []),
   ];
 
   const rowsHTML = rows.map(r => `
@@ -2586,11 +2719,46 @@ function generateFeedback(meta, comments, clips, audio) {
   if (deadPct > 40) fb.push(['warn', `<strong>${deadPct.toFixed(0)}%</strong> of your stream minutes had fewer than 2 chat messages. That's a lot of quiet stretches — the VOD won't retain casual viewers through those.`]);
   else if (deadPct < 10) fb.push(['good', `Almost every minute had active chat (only <strong>${deadPct.toFixed(0)}%</strong> quiet). Great consistency.`]);
 
+  // Stream pacing — longest consecutive dead-air run
+  let maxDeadRun = 0, curRun = 0;
+  bins.forEach(b => { if (b < 2) { curRun++; maxDeadRun = Math.max(maxDeadRun, curRun); } else curRun = 0; });
+  if (maxDeadRun >= 15) fb.push(['warn', `Your longest quiet stretch was <strong>${maxDeadRun} consecutive minutes</strong> with almost no chat. That's a significant pacing issue — viewers who joined during that window likely left. Consider segment changes, audience interaction beats, or game switching to break up long silences.`]);
+  else if (maxDeadRun >= 6) fb.push(['info', `Longest quiet stretch: <strong>${maxDeadRun} min</strong>. Not critical, but worth noting — check what was happening at that point.`]);
+
+  // Cold open quality — first 5 minutes
+  const coldOpen = comments.filter(c => c.t < 300);
+  const coldCpm = coldOpen.length / 5;
+  if (coldCpm < 1) fb.push(['warn', `<strong>Weak cold open</strong> — only ${coldCpm.toFixed(1)} msg/min in your first 5 minutes. VOD viewers decide whether to keep watching in the first 60–90 seconds. Start with energy: greet chat by name, tease what's coming, jump straight into the action.`]);
+  else if (coldCpm >= 3) fb.push(['good', `Strong cold open — <strong>${coldCpm.toFixed(1)} msg/min</strong> in the first 5 minutes. Chat engaged early, which is a good signal for VOD retention.`]);
+
+  // Outro quality — last 5 minutes
+  const outroStart = Math.max(0, dur - 300);
+  const outro = comments.filter(c => c.t >= outroStart);
+  const outroCpm = outro.length / 5;
+  if (outroCpm < 1 && dur > 600) fb.push(['info', `Quiet outro — <strong>${outroCpm.toFixed(1)} msg/min</strong> in the last 5 minutes. A strong close (thanking regulars by name, announcing next stream) helps retain viewers into the raid and leaves a lasting impression.`]);
+  else if (outroCpm >= 3) fb.push(['good', `Active outro — <strong>${outroCpm.toFixed(1)} msg/min</strong> in the final 5 minutes. Chat stayed engaged right to the end.`]);
+
+  // Subscriber / VIP / mod share
+  const subMsgs = comments.filter(c => c.isSubscriber).length;
+  const modMsgs = comments.filter(c => c.isMod).length;
+  const vipMsgs = comments.filter(c => c.isVIP).length;
+  const subPct  = comments.length > 0 ? (subMsgs / comments.length) * 100 : 0;
+  if (subPct < 10 && comments.length > 50) fb.push(['info', `Subscriber chat share is <strong>${subPct.toFixed(0)}%</strong> — most of your active chatters aren't subbed. That's normal at small scale but suggests community loyalty is still building. Prioritise thanking and calling out subs by name.`]);
+  else if (subPct >= 30) fb.push(['good', `<strong>${subPct.toFixed(0)}%</strong> of chat messages came from subscribers — your core community is highly engaged.`]);
+
+  // Clip creation rate from Helix (if fetched)
+  if (meta.twitchClipCount != null) {
+    const cc = meta.twitchClipCount;
+    if (cc === 0) fb.push(['info', `No viewer clips were created during this stream. Clip-worthy moments are a strong virality signal — try more reaction-worthy beats.`]);
+    else if (cc >= 5) fb.push(['good', `<strong>${cc} viewer clips</strong> created — strong engagement signal. These moments are your best candidates for social media.`]);
+    else fb.push(['info', `<strong>${cc} viewer clip${cc !== 1 ? 's' : ''}</strong> created. A few clips made it out — check which moments they cover in the Studio tab.`]);
+  }
+
   // Peak moment density
   if (clips.length) {
     const top = clips[0];
     fb.push(['info', `Your peak moment hit at <strong>${fmtDur(top.start)}</strong>. See the Clips section — this is your first priority for social media.`]);
-    if (clips.length < 3) fb.push(['warn', `Only ${clips.length} clearly clip-worthy moment${clips.length===1?'':'s'} detected. If you want to feed your social channels regularly, aim for more hype beats — try segments that prompt reactions (reveals, reveals, challenges, audience interaction).`]);
+    if (clips.length < 3) fb.push(['warn', `Only ${clips.length} clearly clip-worthy moment${clips.length===1?'':'s'} detected. If you want to feed your social channels regularly, aim for more hype beats — try segments that prompt reactions (reveals, challenges, audience interaction).`]);
     else fb.push(['good', `<strong>${clips.length}</strong> clip-worthy moments — enough to spread across a week of social posts.`]);
   } else fb.push(['warn', `No standout clip-worthy moments detected. Chat engagement was flat throughout — consider hooks, segments, or interactive moments next time.`]);
 
@@ -3192,6 +3360,7 @@ function switchStudioTab(name) {
 
   document.querySelectorAll('.studio-tab-btn').forEach(b => {
     const active = b.dataset.studio === name;
+    b.classList.toggle('active', active);
     b.style.color = active ? 'var(--ink)' : 'var(--ink-dim)';
     b.style.fontWeight = active ? '600' : '500';
     b.style.borderBottomColor = active ? 'var(--ink)' : 'transparent';
@@ -4130,6 +4299,190 @@ function computeScheduleConsistency(vods) {
   };
 }
 
+// ===============================================
+// Subscriber count + tier breakdown
+// ===============================================
+async function loadSubCount(userId, client, token) {
+  const subsGrid = document.getElementById('channel-subs-grid');
+  if (!subsGrid) return;
+  try {
+    // /subscriptions returns total_count and the list; we only need the count + tiers
+    const res = await helixRaw(`/subscriptions?broadcaster_id=${userId}&first=1`, client, token);
+    const total = res.total || 0;
+    const points = res.points || 0; // sub points (T1=1, T2=2, T3=6)
+
+    // Tier breakdown requires paginating all subs — expensive for large channels.
+    // Instead compute rough tier split from sub points heuristic:
+    // points = T1*1 + T2*2 + T3*6. We show total + points as a proxy.
+    subsGrid.className = 'stats-grid';
+    subsGrid.innerHTML = `
+      <div class="stat">
+        <div class="stat-label">Total subs</div>
+        <div class="stat-value">${nFmt(total)}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Sub points</div>
+        <div class="stat-value">${nFmt(points)}</div>
+        <div class="stat-sub">T1=1pt · T2=2pt · T3=6pt</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Avg tier proxy</div>
+        <div class="stat-value">${total > 0 ? (points / total).toFixed(2) : '—'}</div>
+        <div class="stat-sub">points ÷ subs · T1 baseline = 1.0</div>
+      </div>
+    `;
+  } catch (e) {
+    if (subsGrid) subsGrid.innerHTML = `<div style="color:var(--danger);font-size:13px;">${
+      e.message.includes('401') || e.message.includes('403')
+        ? 'Re-sign in to grant subscription access (new permission required).'
+        : 'Could not load subscriber data: ' + escapeHTML(e.message)
+    }</div>`;
+    log('Sub count fetch failed: ' + e.message, 'warn');
+  }
+}
+
+// ===============================================
+// Bits leaderboard
+// ===============================================
+async function loadBits(userId, client, token) {
+  const bitsContent = document.getElementById('channel-bits-content');
+  if (!bitsContent) return;
+  try {
+    // period=all gives all-time total; top cheerers up to 10
+    const res = await helixRaw(`/bits/leaderboard?broadcaster_id=${userId}&count=5&period=all`, client, token);
+    const total = res.total || 0;
+    const leaders = res.data || [];
+
+    const leadersHTML = leaders.length ? `
+      <div style="margin-top:12px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);margin-bottom:8px;">Top cheerers (all time)</div>
+        ${leaders.map((l, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            <span style="font-family:var(--mono);font-weight:700;color:var(--ink-dim);min-width:20px;">#${l.rank}</span>
+            <span style="flex:1;">${escapeHTML(l.user_name)}</span>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--ink);">${nFmt(l.score)} bits</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div style="color:var(--ink-faint);font-size:13px;margin-top:8px;">No bits data yet.</div>';
+
+    bitsContent.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Total bits (all time)</div>
+          <div class="stat-value">${nFmt(total)}</div>
+          <div class="stat-sub">≈ $${(total * 0.01).toFixed(2)} USD</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Top cheerers</div>
+          <div class="stat-value">${leaders.length}</div>
+          <div class="stat-sub">shown below</div>
+        </div>
+      </div>
+      ${leadersHTML}
+    `;
+  } catch (e) {
+    if (bitsContent) bitsContent.innerHTML = `<div style="color:var(--danger);font-size:13px;">${
+      e.message.includes('401') || e.message.includes('403')
+        ? 'Re-sign in to grant bits access (new permission required).'
+        : 'Could not load bits data: ' + escapeHTML(e.message)
+    }</div>`;
+    log('Bits fetch failed: ' + e.message, 'warn');
+  }
+}
+
+// ===============================================
+// Bitrate card — rendered into #bitrate-card in Stream Analysis
+// ===============================================
+// ===============================================
+// Helix clip creation rate — how many viewer clips were made during this VOD
+// ===============================================
+async function fetchVodClipCount(vodId) {
+  const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
+  if (!saved.client || !saved.token) return null;
+  try {
+    // Helix clips endpoint paginates — fetch up to 100 (sufficient signal for most VODs)
+    const res = await helixRaw(`/clips?video_id=${vodId}&first=100`, saved.client, saved.token);
+    return (res.data || []).length;
+  } catch (e) {
+    log('Clip count fetch failed: ' + e.message, 'warn');
+    return null;
+  }
+}
+
+async function fetchAndRenderBitrateCard(vodId) {
+  const card = document.getElementById('bitrate-card');
+  if (!card) return;
+  try {
+    const masterUrl = await AudioProbe.getVODPlaylistURL(vodId);
+    const master = await AudioProbe.fetchText(masterUrl);
+
+    // Parse variants — extend to also grab RESOLUTION and VIDEO tags
+    const lines = master.split('\n');
+    const variants = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('#EXT-X-STREAM-INF')) {
+        const info = lines[i];
+        const uri = (lines[i+1] || '').trim();
+        const bw   = +(( info.match(/BANDWIDTH=(\d+)/)   || [])[1] || 0);
+        const res  =   ( info.match(/RESOLUTION=(\S+)/)  || [])[1] || '';
+        const name =   ( info.match(/VIDEO="([^"]+)"/)   || [])[1]
+                    || ( info.match(/NAME="([^"]+)"/)    || [])[1]
+                    || '';
+        if (bw) variants.push({ bw, res, name, uri });
+      }
+    }
+
+    if (!variants.length) { card.style.display = 'none'; return; }
+    variants.sort((a, b) => b.bw - a.bw);
+
+    const rowsHTML = variants.map(v => {
+      const mbps = (v.bw / 1_000_000).toFixed(2);
+      const kbps = Math.round(v.bw / 1000);
+      const label = v.name || v.res || '—';
+      const quality = v.bw >= 6_000_000 ? 'ok' : v.bw >= 3_000_000 ? '' : 'warn';
+      return `
+        <tr>
+          <td style="padding:6px 12px 6px 0;font-size:13px;color:var(--ink);">${escapeHTML(label)}</td>
+          <td style="padding:6px 0;font-family:var(--mono);font-size:13px;color:var(--ink);">${mbps} Mbps</td>
+          <td style="padding:6px 0 6px 12px;font-family:var(--mono);font-size:12px;color:var(--ink-dim);">${kbps} kbps</td>
+          <td style="padding:6px 0 6px 12px;">
+            <span class="feedback-tag ${quality}" style="font-size:10px;">${quality === 'ok' ? 'GOOD' : quality === 'warn' ? 'LOW' : 'MID'}</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+    const source = variants[0]; // highest quality
+    const sourceMbps = (source.bw / 1_000_000).toFixed(2);
+    const note = source.bw >= 6_000_000
+      ? 'Source quality is excellent — Twitch is receiving a high-bitrate feed.'
+      : source.bw >= 3_000_000
+      ? 'Source bitrate is adequate but consider increasing your OBS bitrate if upload allows.'
+      : 'Source bitrate is low — viewers on lower connections may see quality issues. Check your OBS encoding settings.';
+
+    card.style.display = '';
+    card.innerHTML = `
+      <h2>Stream quality &amp; bitrate</h2>
+      <p class="subtitle">${escapeHTML(note)}</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="padding:4px 12px 8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);text-align:left;">Quality</th>
+            <th style="padding:4px 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);text-align:left;">Bitrate</th>
+            <th style="padding:4px 0 8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);text-align:left;">kbps</th>
+            <th style="padding:4px 0 8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);text-align:left;"></th>
+          </tr>
+        </thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>
+      <div style="margin-top:10px;font-size:11px;color:var(--ink-faint);font-family:var(--mono);">Source: Twitch HLS manifest · ${variants.length} quality level${variants.length !== 1 ? 's' : ''} available</div>
+    `;
+  } catch (e) {
+    card.style.display = 'none';
+    log('Bitrate card failed: ' + e.message, 'warn');
+  }
+}
+
 async function loadChannelOverview() {
   const emptyEl = document.getElementById('channel-overview-empty');
   const contentEl = document.getElementById('channel-overview-content');
@@ -4274,6 +4627,12 @@ async function loadChannelOverview() {
     if (scheduleContent) scheduleContent.innerHTML = `<div style="color:var(--danger);font-size:13px;">Schedule analysis failed: ${escapeHTML(e.message)}</div>`;
     log('Schedule analysis failed: ' + e.message, 'warn');
   }
+
+  // ── Subscriber count + tier ──
+  loadSubCount(userId, saved.client, saved.token);
+
+  // ── Bits leaderboard ──
+  loadBits(userId, saved.client, saved.token);
 }
 // ===============================================
 // AI unlock — server-side key, always available post-Railway
@@ -4742,6 +5101,107 @@ The rewrite should be a genuinely improved version the streamer can copy directl
 });
 
 // ===============================================
+// Discoverability audit
+// ===============================================
+async function runDiscoverabilityAudit() {
+  const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
+  if (!saved.user || !saved.client || !saved.token) return;
+
+  const contentEl = document.getElementById('channel-discoverability-content');
+  contentEl.innerHTML = '<div class="ai-result"><div class="ai-result-loading"><div class="ai-spinner"></div> Fetching channel data…</div></div>';
+
+  try {
+    const [channelRes, userRes] = await Promise.all([
+      helixRaw(`/channels?broadcaster_id=${saved.user.id}`, saved.client, saved.token),
+      helixRaw(`/users?id=${saved.user.id}`, saved.client, saved.token),
+    ]);
+    const ch  = channelRes.data?.[0] || {};
+    const usr = userRes.data?.[0] || {};
+
+    const title       = ch.title || '(no title set)';
+    const category    = ch.game_name || '(no category set)';
+    const tags        = (ch.tags || []).join(', ') || '(no tags set)';
+    const language    = ch.broadcaster_language || 'unknown';
+    const description = usr.description || '(no description set)';
+
+    contentEl.innerHTML = '<div class="ai-result"><div class="ai-result-loading"><div class="ai-spinner"></div> Analysing with Claude…</div></div>';
+
+    const system = `You are a Twitch channel discoverability expert. Analyse channel metadata and return ONLY valid JSON — no other text.
+Return: { "score": 1-10, "verdict": "one sentence summary", "dimensions": [ { "name": string, "score": 1-10, "note": string } ], "wins": [string], "issues": [string], "actions": [string] }
+Dimensions to score: Title clarity, Category fit, Tag coverage, Description quality, Language/accessibility.
+Actions should be specific and immediately actionable — not generic advice. Max 5 actions.`;
+
+    const user = `Audit this Twitch channel for discoverability:
+- Stream title: "${title}"
+- Category: "${category}"
+- Tags: ${tags}
+- Language: ${language}
+- Description: "${description.slice(0, 500)}"`;
+
+    const raw = await callClaude(system, user, 1000);
+    const data = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    const sc = data.score || 0;
+    const cls = sc >= 7 ? 'great' : sc >= 5 ? 'ok' : 'poor';
+
+    const dimsHTML = (data.dimensions || []).map(d => {
+      const dcls = d.score >= 7 ? 'great' : d.score >= 5 ? 'ok' : 'poor';
+      return `<div class="ai-dimension-row">
+        <span class="ai-dim-label">${escapeHTML(d.name)}</span>
+        <span class="ai-dim-score ${dcls}">${d.score}/10</span>
+        <span style="font-size:12px;color:var(--ink-dim);flex:2;text-align:right;">${escapeHTML(d.note||'')}</span>
+      </div>`;
+    }).join('');
+
+    const winsHTML = (data.wins || []).map(s =>
+      `<div style="display:flex;gap:6px;font-size:13px;margin-bottom:4px;"><span style="color:var(--success);">✓</span><span>${escapeHTML(s)}</span></div>`
+    ).join('');
+    const issuesHTML = (data.issues || []).map(s =>
+      `<div style="display:flex;gap:6px;font-size:13px;margin-bottom:4px;"><span style="color:var(--danger);">✗</span><span>${escapeHTML(s)}</span></div>`
+    ).join('');
+    const actionsHTML = (data.actions || []).map((s, i) =>
+      `<div style="display:flex;gap:8px;font-size:13px;margin-bottom:6px;"><span style="font-family:var(--mono);font-weight:700;color:var(--accent);min-width:20px;">${i+1}.</span><span>${escapeHTML(s)}</span></div>`
+    ).join('');
+
+    const metaHTML = `
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:12px;margin-bottom:14px;line-height:1.8;">
+        <strong>Audited:</strong> title · category (${escapeHTML(category)}) · ${(ch.tags||[]).length} tag${(ch.tags||[]).length !== 1 ? 's' : ''} · description
+      </div>`;
+
+    contentEl.innerHTML = `<div class="ai-result">
+      <div class="ai-score-row">
+        <span class="ai-score-badge ${cls}">${sc}/10</span>
+        <div>
+          <div class="ai-score-label">${escapeHTML(data.verdict || '')}</div>
+          <div class="ai-score-sublabel">${escapeHTML((saved.user.display_name || saved.user.login) + '\'s channel')}</div>
+        </div>
+      </div>
+      ${metaHTML}
+      ${dimsHTML ? `<div style="margin-bottom:14px;">${dimsHTML}</div>` : ''}
+      ${winsHTML ? `<div class="ai-section"><div class="ai-section-head">What's working</div>${winsHTML}</div>` : ''}
+      ${issuesHTML ? `<div class="ai-section"><div class="ai-section-head">Issues</div>${issuesHTML}</div>` : ''}
+      ${actionsHTML ? `<div class="ai-section"><div class="ai-section-head">Actions (priority order)</div>${actionsHTML}</div>` : ''}
+      <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;color:var(--ink-faint);font-family:var(--mono);">✦ Analysed by Claude</span>
+        <button class="ghost small" id="rerun-discoverability-btn">Re-run audit</button>
+      </div>
+    </div>`;
+
+    document.getElementById('rerun-discoverability-btn')?.addEventListener('click', runDiscoverabilityAudit);
+
+  } catch (e) {
+    contentEl.innerHTML = `<div class="notice warn" style="margin-bottom:10px;">Audit failed: ${escapeHTML(e.message)}</div><button class="ghost" id="retry-discoverability-btn">Try again</button>`;
+    document.getElementById('retry-discoverability-btn')?.addEventListener('click', runDiscoverabilityAudit);
+    log('Discoverability audit failed: ' + e.message, 'warn');
+  }
+}
+
+function wireDiscoverabilityBtn() {
+  const btn = document.getElementById('run-discoverability-btn');
+  if (btn) btn.addEventListener('click', runDiscoverabilityAudit);
+}
+wireDiscoverabilityBtn();
+
+// ===============================================
 // MAIN
 // ===============================================
 
@@ -4781,6 +5241,8 @@ async function runAnalysis(vodId) {
   $('#vod-section').style.display = 'none';
   $('#feedback-section').style.display = 'none';
   $('#audio-results-card').style.display = 'none';
+  const bitrateCard = document.getElementById('bitrate-card');
+  if (bitrateCard) { bitrateCard.style.display = 'none'; bitrateCard.innerHTML = ''; }
   $('#studio-empty').style.display = '';
   $('#studio-tabs-bar').style.display = 'none';
   window.__activeStudioTab = null;
@@ -4980,6 +5442,27 @@ async function runAnalysis(vodId) {
     if (isAudioUnlocked()) {
       runDenseAudioScan(id, duration, clips).catch(e => log('Dense audio scan failed: ' + e.message, 'warn'));
     }
+
+    // Bitrate card — fetch HLS manifest and surface quality levels (background, no-block)
+    fetchAndRenderBitrateCard(id).catch(e => log('Bitrate card failed: ' + e.message, 'warn'));
+
+    // Clip creation rate — fetch viewer clip count from Helix, then update benchmark + feedback
+    fetchVodClipCount(id).then(clipCount => {
+      if (clipCount === null) return;
+      log(`Viewer clips created: ${clipCount}`);
+      const metaWithClips = { duration, twitchClipCount: clipCount };
+      // Re-render benchmark card with clip count row
+      const benchEl2 = $('#benchmark-card');
+      if (benchEl2) benchEl2.innerHTML = renderBenchmarkCard(metaWithClips, comments, clips);
+      // Re-render feedback list with clip count note
+      const newFeedback = generateFeedback(metaWithClips, comments, clips, audio);
+      $('#feedback-list').innerHTML = newFeedback.map(([tag, body]) => `
+        <li class="feedback-item">
+          <span class="feedback-tag ${tag}">${tag === 'good' ? 'OK' : tag === 'bad' ? 'ISSUE' : tag === 'warn' ? 'NOTE' : 'INFO'}</span>
+          <div class="feedback-body">${body}</div>
+        </li>
+      `).join('');
+    }).catch(e => log('Clip count failed: ' + e.message, 'warn'));
 
     // Step 6: Save analysis to history — only for the logged-in user's own channel
     const saved6 = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
