@@ -259,20 +259,25 @@ function transmuxTStoMP4(tsBytes) {
   });
 }
 
-// Decode audio from a TS segment: transmux → fMP4 → AudioBuffer
+// Decode audio from bytes returned by /proxy-audio.
+// The server-side proxy already demuxes TS -> ADTS/AAC, so bytes arriving here
+// are typically AAC. Try direct decodeAudioData first (fast path).
+// Only fall back to mux.js transmux if that fails — handles the rare case where
+// the server proxy returned raw TS (X-Demuxed: 0, i.e. server demux error).
 async function decodeSegment(ctx, bytes) {
-  let decodeInput;
+  const rawBuf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  // Fast path: direct decode (works for ADTS/AAC, fMP4, MP4, WebM)
   try {
-    const fmp4 = await transmuxTStoMP4(bytes);
-    decodeInput = fmp4.buffer.slice(fmp4.byteOffset, fmp4.byteOffset + fmp4.byteLength);
-  } catch (transmuxErr) {
-    // Transmux failed — fall back to trying raw bytes (some segments may already be fMP4)
-    decodeInput = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-  }
-  try {
-    return await ctx.decodeAudioData(decodeInput);
-  } catch (e) {
-    throw new Error('decode: ' + e.message);
+    return await ctx.decodeAudioData(rawBuf.slice(0));
+  } catch (directErr) {
+    // Fallback: bytes are probably raw TS — try transmux with mux.js
+    try {
+      const fmp4 = await transmuxTStoMP4(bytes);
+      const fmp4Buf = fmp4.buffer.slice(fmp4.byteOffset, fmp4.byteOffset + fmp4.byteLength);
+      return await ctx.decodeAudioData(fmp4Buf);
+    } catch (transmuxErr) {
+      throw new Error('decode failed (direct: ' + directErr.message + '; transmux: ' + transmuxErr.message + ')');
+    }
   }
 }
 

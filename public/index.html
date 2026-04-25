@@ -4574,7 +4574,7 @@ Alternatives should be meaningfully different rewrites — not just minor edits.
   const user = `Rate this Twitch stream title: "${title}"`;
 
   try {
-    const raw = await callClaude(system, user, 700);
+    const raw = await callClaude(system, user, 1000);
     const data = JSON.parse(raw.replace(/```json|```/g, '').trim());
     const sc = data.score || 0;
     const cls = sc >= 7 ? 'great' : sc >= 5 ? 'ok' : 'poor';
