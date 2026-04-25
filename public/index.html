@@ -1956,10 +1956,11 @@ $('#signin-btn').addEventListener('click', () => {
     );
     if (!entered) return;
     clientId = entered.trim();
-    const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-    saved.client = clientId;
-    localStorage.setItem('vodDeskCreds', JSON.stringify(saved));
   }
+  // Always persist the client ID so bootstrapIfLoggedIn can use it after the OAuth redirect
+  const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
+  saved.client = clientId;
+  localStorage.setItem('vodDeskCreds', JSON.stringify(saved));
 
   const state = Math.random().toString(36).slice(2);
   sessionStorage.setItem('oauthState', state);
@@ -2036,9 +2037,11 @@ function handleAuthCallback() {
 
 async function bootstrapIfLoggedIn() {
   const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-  if (!saved.token || !saved.client) return;
+  if (!saved.token) return;
+  const clientId = getClientId(); // falls back to DEFAULT_CLIENT_ID if saved.client missing
+  if (!clientId) return;
   try {
-    const res = await helixRaw('/users', saved.client, saved.token);
+    const res = await helixRaw('/users', clientId, saved.token);
     if (!res.data.length) throw new Error('No user data');
     const user = res.data[0];
     saved.user = user;
