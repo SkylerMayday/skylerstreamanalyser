@@ -1614,28 +1614,88 @@
       </div>
       <div id="channel-overview-content" style="display:none;">
         <!-- Follower stats card -->
-        <div class="card" id="channel-followers-card">
-          <h2>Follower metrics</h2>
-          <p class="subtitle" id="channel-followers-subtitle">—</p>
-          <div class="stats-grid" id="channel-followers-grid" style="margin-top:14px;"></div>
-        </div>
-        <!-- Schedule consistency card -->
-        <div class="card" id="channel-schedule-card">
-          <h2>Schedule consistency</h2>
-          <p class="subtitle">How consistently you stream on the same days and at similar times, based on your last 20 VODs.</p>
-          <div id="channel-schedule-content" style="margin-top:14px;"></div>
-        </div>
-        <!-- Subscriber metrics card -->
-        <div class="card" id="channel-subs-card">
-          <h2>Subscribers</h2>
-          <p class="subtitle">Current subscriber count and tier breakdown for your channel.</p>
-          <div class="stats-grid" id="channel-subs-grid" style="margin-top:14px;"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
-        </div>
-        <!-- Bits card -->
-        <div class="card" id="channel-bits-card">
-          <h2>Bits</h2>
-          <p class="subtitle">Total bits received and your top cheerers.</p>
-          <div id="channel-bits-content" style="margin-top:14px;"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+        <!-- Current Stats card (followers + subs + bits unified) -->
+        <div class="card" id="channel-stats-card">
+          <h2>Current Stats</h2>
+          <p class="subtitle" id="channel-stats-subtitle">—</p>
+
+          <!-- Followers sub-container -->
+          <div style="margin-top:16px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);margin-bottom:10px;">Followers</div>
+            <div class="stats-grid" id="channel-followers-grid"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+          </div>
+
+          <!-- Subs sub-container -->
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);margin-bottom:10px;">Subscribers</div>
+            <div class="stats-grid" id="channel-subs-grid"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+          </div>
+
+          <!-- Bits sub-container -->
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);margin-bottom:10px;">Bits</div>
+            <div id="channel-bits-content"><div style="color:var(--ink-dim);font-size:13px;">Loading…</div></div>
+          </div>
+
+          <!-- Expandable tip buttons -->
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;">
+
+            <!-- Followers growth tips -->
+            <div>
+              <button class="ghost" id="follower-tips-btn" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;">
+                <span>💜 How to gain more followers</span>
+                <span id="follower-tips-chevron" style="font-size:12px;color:var(--ink-dim);transition:transform 0.2s;">▼</span>
+              </button>
+              <div id="follower-tips-content" style="display:none;margin-top:12px;padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-size:13px;color:var(--ink-2);line-height:1.7;">
+                <div style="font-weight:600;color:var(--ink);margin-bottom:10px;">Consistent habits that compound over time:</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Raid out every stream</strong> — raiding other small streamers builds reciprocal relationships and puts your name in front of new audiences regularly.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Clip your best moments</strong> and post them to TikTok/YouTube Shorts/Twitter within 24 hours of the stream. Clips are the primary off-platform discovery channel for small streamers.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Use /shoutout</strong> on streamers who raid you — it signals community to your existing viewers and gives the raiding streamer a reason to return.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Stream at consistent times</strong> — Twitch's algorithm and viewers' habits both reward predictability. Irregular schedules make it hard to build a returning audience.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Optimise your title every stream</strong> — use the Title Rating tool to check clickability and searchability. Titles with game names + emotional hooks surface better in browse.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Play games in the right category size</strong> — massive games (Fortnite, Minecraft) have too much competition. Find categories with 50–300 concurrent viewers where you can appear on page 1–2 of the browse tab.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Talk as if someone is watching</strong> even when no one is — new viewers landing on a silent stream leave immediately. Narrate your gameplay, react out loud, be a presence.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Engage with your community off-stream</strong> — Discord, Twitter/X replies, responding to comments on your clips. Off-stream presence converts casual viewers into followers.</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subs / Bits / Hype Train tips -->
+            <div>
+              <button class="ghost" id="monetise-tips-btn" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;">
+                <span>💰 How to get more subs, bits &amp; hype trains</span>
+                <span id="monetise-tips-chevron" style="font-size:12px;color:var(--ink-dim);transition:transform 0.2s;">▼</span>
+              </button>
+              <div id="monetise-tips-content" style="display:none;margin-top:12px;padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-size:13px;color:var(--ink-2);line-height:1.7;">
+
+                <div style="font-weight:600;color:var(--ink);margin-bottom:8px;">Subscriptions:</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Ask once, clearly, at a natural moment</strong> — don't beg repeatedly. Pick one high-energy moment per stream to say "if you're enjoying this, a sub goes a long way."</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Make sub perks obvious</strong> — call out what subs get (emotes, Discord role, no ads). Viewers often don't sub because they don't know what they're getting.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Run sub goals</strong> — "25 subs and I'll do X" creates a shared mission. Announce the goal early and update it visibly throughout the stream.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Thank every sub by name immediately</strong> — personalised acknowledgement is the main reason viewers sub on small channels. Generic alerts get ignored.</span></div>
+                </div>
+
+                <div style="font-weight:600;color:var(--ink);margin-bottom:8px;">Bits:</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Set up bit alerts with personality</strong> — custom alerts that fit your brand get clipped and shared. Generic alerts don't.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Use Channel Points redeems tied to bits</strong> — e.g. "100 bits to pick my next game" or "500 bits to see me attempt X". Gives bits a clear value exchange.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span><strong>Acknowledge small cheers too</strong> — 100 bits is real money. Calling out a 100-bit cheer with the same energy as a 1000-bit one signals that every contribution matters.</span></div>
+                </div>
+
+                <div style="font-weight:600;color:var(--ink);margin-bottom:8px;">🚂 Hype Trains:</div>
+                <p style="margin-bottom:8px;">Hype Trains trigger when multiple bits cheers or new subs happen in quick succession — they boost your channel visibility on the Twitch home page during the event.</p>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span>Run <strong>sub goals or sub hype</strong> segments — announce a threshold ("if we hit 5 new subs in 10 min I'll do X") to cluster activity and trigger the train.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span>Call out every cheer and sub immediately — social proof drives more of the same behaviour in the window.</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span>Set a <strong>Hype Train cooldown</strong> in Creator Dashboard → Monetisation → Hype Train (minimum 1 hour between trains).</span></div>
+                  <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;min-width:16px;">→</span><span>During peak chat moments, verbally prompt — "if anyone's been thinking about subbing, now's the time" — timing it to existing energy amplifies the effect.</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
         <!-- Channel Description Analysis -->
         <div class="card" id="channel-desc-card">
@@ -1663,27 +1723,11 @@
         <!-- Community protection card -->
         <div class="card" id="channel-protection-card">
           <h2>Community protection</h2>
-          <p class="subtitle">Hype train optimisation, hate raid defence, and bot removal — tools and tactics.</p>
+          <p class="subtitle">Hate raid defence and bot removal — tools and tactics to set up before you need them.</p>
           <div id="channel-protection-content">
             <div style="display:grid;gap:16px;margin-top:4px;">
 
-              <!-- Hype Train -->
-              <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:16px;">
-                <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🚂 Hype Train optimisation</div>
-                <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Hype Trains trigger when multiple bits cheers or new subs happen in quick succession. They boost your channel visibility on the Twitch home page during the event.</p>
-                <div style="font-size:13px;color:var(--ink-2);">
-                  <div style="font-weight:600;margin-bottom:6px;color:var(--ink);">How to trigger more hype trains:</div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Run <strong>sub goals or sub hype</strong> segments — announce a threshold ("if we hit 5 new subs in 10 min I'll do X") to create momentum</span></div>
-                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Use <strong>channel points</strong> redeems tied to bits to encourage smaller cheers to cluster</span></div>
-                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Call out every cheer and sub by name immediately — social proof drives more of the same behaviour</span></div>
-                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>Set a <strong>Hype Train cooldown</strong> in Creator Dashboard → Monetisation → Hype Train (min 1 hour between trains)</span></div>
-                    <div style="display:flex;gap:8px;"><span style="color:var(--accent);font-weight:700;">→</span><span>During peak moments (high chat activity), verbally prompt — "if anyone's been thinking about subbing, now's the time"</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Hate Raid + Bots -->
+              <!-- Hate Raid + Bots only -->
               <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:16px;">
                 <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🛡️ Hate raid defence &amp; bot removal</div>
                 <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Hate raids send waves of bots or hostile accounts into your chat. Set these up before you need them — mid-raid is too late.</p>
@@ -1992,8 +2036,9 @@ function showLoggedIn(user) {
   $('#user-chip').style.display = '';
   $('#user-name').textContent = user.display_name;
   if (user.profile_image_url) $('#user-avatar').src = user.profile_image_url;
-  // Show Dashboard tab (login-gated)
+  // Show Dashboard tab (login-gated) then switch to it
   $('#tab-dashboard').hidden = false;
+  switchTab('dashboard');
   // Pre-fill channel input with user's own channel
   const chanInput = $('#channel-input');
   if (chanInput && !chanInput.value) chanInput.value = user.login;
@@ -4318,16 +4363,16 @@ async function loadSubCount(userId, client, token) {
     subsGrid.className = 'stats-grid';
     subsGrid.innerHTML = `
       <div class="stat">
-        <div class="stat-label">Total subs</div>
+        <div class="stat-label">Current Subs</div>
         <div class="stat-value">${nFmt(total)}</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Sub points</div>
+        <div class="stat-label">Current Sub Points</div>
         <div class="stat-value">${nFmt(points)}</div>
         <div class="stat-sub">T1=1pt · T2=2pt · T3=6pt</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Avg tier proxy</div>
+        <div class="stat-label">Avg Tier Proxy</div>
         <div class="stat-value">${total > 0 ? (points / total).toFixed(2) : '—'}</div>
         <div class="stat-sub">points ÷ subs · T1 baseline = 1.0</div>
       </div>
@@ -4501,43 +4546,30 @@ async function loadChannelOverview() {
   if (emptyEl) emptyEl.style.display = 'none';
   if (contentEl) contentEl.style.display = '';
 
-  // ── Follower metrics ──
-  const followersCard = document.getElementById('channel-followers-card');
+  // ── Current Stats card ──
+  const followersCard = document.getElementById('channel-stats-card');
   const followersGrid = document.getElementById('channel-followers-grid');
-  const followersSub = document.getElementById('channel-followers-subtitle');
+  const statsSub = document.getElementById('channel-stats-subtitle');
 
-  if (followersGrid) followersGrid.innerHTML = '<div style="padding:10px 0;color:var(--ink-dim);font-size:13px;">Loading follower data…</div>';
+  if (followersGrid) followersGrid.innerHTML = '<div style="padding:4px 0;color:var(--ink-dim);font-size:13px;">Loading…</div>';
 
   try {
     const followerCount = await fetchFollowerCount(userId);
 
-    // Get history to compute follower conversion proxy
     const history = loadHistory();
-    const totalViews = history.reduce((a, r) => a + (r.viewCount || 0), 0);
-
-    // Pull view count from the most recent VOD via metadata if available
-    // (viewCount stored in history record if we add it — see note below)
-    // For now compute from chat velocity proxy: avg cpm across sessions
-    const avgCpm = history.length
-      ? history.reduce((a, r) => a + (r.cpm || 0), 0) / history.length
+    const nAnalysed = history.length;
+    const avgCpm = nAnalysed
+      ? history.reduce((a, r) => a + (r.cpm || 0), 0) / nAnalysed
       : null;
 
-    let conversionNote = '';
-    if (history.length >= 3 && avgCpm) {
-      // Rough heuristic: every ~1 cpm ≈ 10-20 CCV for small streamers
-      const estCCV = Math.round(avgCpm * 12);
-      const estFollowRate = followerCount > 0 && estCCV > 0
-        ? ((estCCV / Math.max(followerCount, 1)) * 100).toFixed(1)
-        : null;
-      if (estFollowRate) {
-        conversionNote = `Estimated ~${estCCV} avg CCV → ~${estFollowRate}% of followers engage per stream`;
-      }
+    // Update card subtitle with streams-analysed context
+    if (statsSub) {
+      statsSub.textContent = nAnalysed > 0
+        ? `The following data is based on ${nAnalysed} stream${nAnalysed !== 1 ? 's' : ''} of your own channel analysed.`
+        : 'Analyse your own channel VODs to unlock chat and engagement metrics.';
     }
 
-    if (followersSub) followersSub.textContent = conversionNote || 'Your channel follower data from Twitch.';
-
     if (followersGrid) {
-      const historyStreams = history.length;
       followersGrid.className = 'stats-grid';
       followersGrid.innerHTML = `
         <div class="stat">
@@ -4545,33 +4577,27 @@ async function loadChannelOverview() {
           <div class="stat-value">${nFmt(followerCount)}</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Streams analysed</div>
-          <div class="stat-value">${historyStreams}</div>
-          <div class="stat-sub">own channel only</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Avg chat/min</div>
+          <div class="stat-label">Avg Chat/Min</div>
           <div class="stat-value">${avgCpm != null ? avgCpm.toFixed(1) : '—'}</div>
-          <div class="stat-sub">across saved history</div>
+          <div class="stat-sub">across ${nAnalysed} saved stream${nAnalysed !== 1 ? 's' : ''}</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Est. engage rate</div>
+          <div class="stat-label">Est. Engage Rate</div>
           <div class="stat-value" id="engage-rate-val">—</div>
           <div class="stat-sub" id="engage-rate-sub">CCV / followers</div>
         </div>
       `;
-      // Fill engagement rate after DOM settles
       if (followerCount > 0 && avgCpm != null) {
-        const estCCV2 = Math.round(avgCpm * 12);
-        const rate = ((estCCV2 / followerCount) * 100).toFixed(1);
+        const estCCV = Math.round(avgCpm * 12);
+        const rate = ((estCCV / followerCount) * 100).toFixed(1);
         const el = document.getElementById('engage-rate-val');
         const sub = document.getElementById('engage-rate-sub');
         if (el) el.textContent = rate + '%';
-        if (sub) sub.textContent = `~${nFmt(estCCV2)} CCV est.`;
+        if (sub) sub.textContent = `~${nFmt(estCCV)} CCV est.`;
       }
     }
   } catch (e) {
-    if (followersGrid) followersGrid.innerHTML = `<div style="padding:10px 0;color:var(--danger);font-size:13px;">Could not load follower data: ${escapeHTML(e.message)}</div>`;
+    if (followersGrid) followersGrid.innerHTML = `<div style="padding:4px 0;color:var(--danger);font-size:13px;">Could not load follower data: ${escapeHTML(e.message)}</div>`;
     log('Follower fetch failed: ' + e.message, 'warn');
   }
 
@@ -5201,6 +5227,21 @@ function wireDiscoverabilityBtn() {
   if (btn) btn.addEventListener('click', runDiscoverabilityAudit);
 }
 wireDiscoverabilityBtn();
+
+// ── Tip button expand/collapse ──
+function wireTipToggle(btnId, contentId, chevronId) {
+  const btn = document.getElementById(btnId);
+  const content = document.getElementById(contentId);
+  const chevron = document.getElementById(chevronId);
+  if (!btn || !content) return;
+  btn.addEventListener('click', () => {
+    const open = content.style.display !== 'none';
+    content.style.display = open ? 'none' : '';
+    if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+  });
+}
+wireTipToggle('follower-tips-btn', 'follower-tips-content', 'follower-tips-chevron');
+wireTipToggle('monetise-tips-btn', 'monetise-tips-content', 'monetise-tips-chevron');
 
 // ===============================================
 // MAIN
