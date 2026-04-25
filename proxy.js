@@ -51,6 +51,17 @@ function setCORSHeaders(res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Client-Id, Authorization');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, X-Demuxed, X-Demux-Error');
+  // CSP: allow eval (required by mux.js for TS demux) and our CDN sources
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+    "connect-src 'self' https://api.twitch.tv https://gql.twitch.tv https://api.anthropic.com https://*.ttvnw.net https://*.cloudfront.net; " +
+    "img-src 'self' data: https: blob:; " +
+    "media-src 'self' blob: https://*.ttvnw.net https://*.cloudfront.net; " +
+    "frame-src https://player.twitch.tv https://clips.twitch.tv; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "font-src 'self' data:;"
+  );
 }
 
 // ============================================================================
