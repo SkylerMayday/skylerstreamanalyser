@@ -1759,6 +1759,7 @@ function log(msg, kind) {
 }
 
 // ===== TAB SWITCHING =====
+let overviewLoaded = false;
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
@@ -1770,6 +1771,14 @@ function switchTab(name) {
     if (!hasActive && panels.length) {
       const firstBtn = view.querySelector('.inner-tab-btn');
       if (firstBtn) switchInnerTab(firstBtn.dataset.inner);
+    }
+  }
+  // Auto-load channel overview the first time Dashboard is opened while logged in
+  if (name === 'dashboard' && !overviewLoaded) {
+    const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
+    if (saved.token) {
+      overviewLoaded = true;
+      loadChannelOverview();
     }
   }
 }
@@ -4559,12 +4568,12 @@ document.getElementById('channel-description-input')?.addEventListener('input', 
   updateCharCount('channel-description-input', 'desc-char', 3000));
 
 // ── Title Rating ──
-document.getElementById('title-rating-btn').addEventListener('click', async () => {
-  const title = (document.getElementById('title-rating-input').value || '').trim();
+// Shared function — called by the Rate button, by auto-run, and by alternative clicks.
+// targetEl: the DOM element to render the result into.
+async function runTitleRating(title, targetEl) {
   if (!title) return;
-  const resultEl = document.getElementById('title-rating-result');
-  resultEl.style.display = '';
-  resultEl.innerHTML = '<div class="ai-result"><div class="ai-result-loading"><div class="ai-spinner"></div> Rating title…</div></div>';
+  targetEl.style.display = '';
+  targetEl.innerHTML = '<div class="ai-result"><div class="ai-result-loading"><div class="ai-spinner"></div> Rating title…</div></div>';
 
   const system = `You are a Twitch title optimisation expert. Analyse stream titles and return ONLY valid JSON — no other text.
 Return: { "score": 1-10, "verdict": "one sentence", "dimensions": [ { "name": "string", "score": 1-10, "note": "string" } ], "strengths": ["string"], "weaknesses": ["string"], "alternatives": ["string","string","string"] }
@@ -4595,11 +4604,12 @@ Alternatives should be meaningfully different rewrites — not just minor edits.
       `<div style="display:flex;gap:6px;font-size:13px;margin-bottom:4px;"><span style="color:var(--danger);">✗</span><span>${escapeHTML(w)}</span></div>`
     ).join('');
 
+    // Alternatives: each is clickable and auto-rates itself inline below the current result
     const altsHTML = (data.alternatives || []).map(a =>
-      `<div class="ai-alt-item" onclick="document.getElementById('title-rating-input').value=this.dataset.title;updateCharCount('title-rating-input','title-rating-char',140);" data-title="${escapeHTML(a)}">${escapeHTML(a)}</div>`
+      `<div class="ai-alt-item" data-alt-title="${escapeHTML(a)}">${escapeHTML(a)}<span style="float:right;font-size:11px;color:var(--accent);font-family:var(--mono);margin-left:8px;">rate →</span></div>`
     ).join('');
 
-    resultEl.innerHTML = `<div class="ai-result">
+    targetEl.innerHTML = `<div class="ai-result">
       <div class="ai-score-row">
         <span class="ai-score-badge ${cls}">${sc}/10</span>
         <div>
@@ -4610,13 +4620,35 @@ Alternatives should be meaningfully different rewrites — not just minor edits.
       ${dimsHTML ? `<div style="margin-bottom:14px;">${dimsHTML}</div>` : ''}
       ${strengthsHTML ? `<div class="ai-section"><div class="ai-section-head">Strengths</div>${strengthsHTML}</div>` : ''}
       ${weaknessHTML ? `<div class="ai-section"><div class="ai-section-head">Weaknesses</div>${weaknessHTML}</div>` : ''}
-      ${altsHTML ? `<div class="ai-alternatives"><div class="ai-alt-head">Click to try an alternative</div>${altsHTML}</div>` : ''}
+      ${altsHTML ? `<div class="ai-alternatives"><div class="ai-alt-head">Click an alternative to rate it</div>${altsHTML}</div>` : ''}
       <div style="margin-top:10px;font-size:11px;color:var(--ink-faint);font-family:var(--mono);">✦ Rated by Claude</div>
-    </div>`;
+    </div>
+    <div class="ai-alt-result" style="display:none;margin-top:12px;"></div>`;
+
+    // Wire alternative clicks — rate inline below, no page navigation
+    targetEl.querySelectorAll('.ai-alt-item').forEach(item => {
+      item.addEventListener('click', async () => {
+        const altTitle = item.dataset.altTitle;
+        // Mark selected
+        targetEl.querySelectorAll('.ai-alt-item').forEach(i => i.style.background = '');
+        item.style.background = 'var(--accent-soft)';
+        const altResultEl = targetEl.querySelector('.ai-alt-result');
+        altResultEl.style.display = '';
+        altResultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        await runTitleRating(altTitle, altResultEl);
+      });
+    });
+
   } catch (e) {
-    resultEl.innerHTML = `<div class="notice warn">Rating failed: ${escapeHTML(e.message)}</div>`;
+    targetEl.innerHTML = `<div class="notice warn">Rating failed: ${escapeHTML(e.message)}</div>`;
     log('Title rating failed: ' + e.message, 'warn');
   }
+}
+
+document.getElementById('title-rating-btn').addEventListener('click', () => {
+  const title = (document.getElementById('title-rating-input').value || '').trim();
+  const resultEl = document.getElementById('title-rating-result');
+  runTitleRating(title, resultEl);
 });
 
 // ── Fetch channel description ──
@@ -5015,32 +5047,17 @@ async function runAnalysis(vodId) {
         titleInput.value = vodTitleText;
         updateCharCount('title-rating-input', 'title-rating-char', 140);
       }
-      // Auto-run title rating in background if AI unlocked; mirror result into inline card (F5)
+      // Auto-run title rating in background if AI unlocked; render directly into inline card (F5)
       if (isAIUnlocked()) {
         (async () => {
           try {
-            const resultEl = document.getElementById('title-rating-result');
-            if (!resultEl) return;
-            document.getElementById('title-rating-btn')?.click();
-            // Poll for result then mirror it into #inline-title-rating-card
-            let attempts = 0;
-            const maxAttempts = 60; // 30s timeout
-            const poll = setInterval(() => {
-              attempts++;
-              const inlineCard = document.getElementById('inline-title-rating-card');
-              const inlineBody = document.getElementById('inline-title-rating-body');
-              const inlineSub = document.getElementById('inline-title-rating-subtitle');
-              const src = document.getElementById('title-rating-result');
-              if (!inlineCard || !inlineBody || !src) { clearInterval(poll); return; }
-              // Result is ready when it has .ai-result with a score badge and no spinner
-              if (src.querySelector('.ai-score-badge') && !src.querySelector('.ai-result-loading')) {
-                inlineBody.innerHTML = src.innerHTML;
-                if (inlineSub) inlineSub.textContent = `"${vodTitleText.slice(0,80)}${vodTitleText.length>80?'…':''}"`;
-                inlineCard.style.display = '';
-                clearInterval(poll);
-              }
-              if (attempts >= maxAttempts) clearInterval(poll);
-            }, 500);
+            const inlineCard = document.getElementById('inline-title-rating-card');
+            const inlineBody = document.getElementById('inline-title-rating-body');
+            const inlineSub = document.getElementById('inline-title-rating-subtitle');
+            if (!inlineCard || !inlineBody) return;
+            if (inlineSub) inlineSub.textContent = `"${vodTitleText.slice(0,80)}${vodTitleText.length>80?'…':''}"`;
+            inlineCard.style.display = '';
+            await runTitleRating(vodTitleText, inlineBody);
           } catch(e) { /* silent */ }
         })();
       }
