@@ -9,27 +9,7 @@
 
 ## ⚠️ PRIORITY — Complete this first (next session)
 
-### Deploy to Railway + post-deployment fixes
-
-All code changes are complete and verified. Output files are ready to deploy.
-
-**Deployment steps (do outside Claude):**
-1. Push all output files to a GitHub repo in this structure:
-   ```
-   proxy.js
-   package.json
-   railway.toml
-   public/
-     index.html
-     lib/
-       audio-probe.js
-   ```
-2. Create a new Railway service pointing to the repo
-3. Set env var: `ANTHROPIC_API_KEY` in Railway service settings
-4. Confirm deploy succeeds and app loads at the Railway URL
-5. Test: sign in, run a VOD analysis, confirm audio works + AI features work
-
-**Post-deployment fixes (implement in next session after Railway confirmed):**
+### Post-deployment fixes
 
 | # | Item | Notes |
 |---|---|---|
@@ -73,13 +53,12 @@ public/
 - `callClaude()` sends `{ system, user, maxTokens }`. Proxy reads the same fields.
 
 ### Tab structure
-- **Top tabs:** Dashboard (login-gated) · Stream Analysis · Settings
-- **Dashboard sub-tabs:** Channel Overview · Stream History · Pre-Stream Checklist
-- **Settings sub-tabs:** Audio Analysis · AI Analysis
+- **Top tabs (logged out):** Stream Analysis only
+- **Top tabs (logged in):** Dashboard · Stream Analysis
+- **Settings tab:** hidden (`display:none`) — not accessible from UI
+- **Dashboard sub-tabs:** Channel Overview · Audio Analysis · Stream History · Pre-Stream Checklist
 - **Stream Analysis results:** VOD metadata → inline-title-rating-card → benchmark-card → ai-metrics-card → feedback-list
 - **Sub-tabs inside Stream Analysis results:** Analysis · Studio
-- **Settings > Audio Analysis:** simple "no config needed" card + echo probe card + local upload card
-- **Settings > AI Analysis:** title rating card only (no key input)
 
 ### Key function map
 | Function | Purpose |
@@ -100,38 +79,29 @@ public/
 
 ## 2. Current state (as of session: 25 Apr 2026)
 
-### Migration complete — all changes verified ✅
+### All changes verified ✅
 
 | Change | Status |
 |---|---|
-| R1: `proxy.js` rewritten as Express app | ✅ |
-| R2: `/api/claude` POST route + rate limiting | ✅ |
-| R3: `callClaude()` POSTs to `/api/claude` relay | ✅ |
-| R4: Claude API key UI + JS fully removed | ✅ |
-| R4: `isAIUnlocked()` → `return true` | ✅ |
-| R4: `isAIUnlocked()` guards removed from title-rating, desc-analysis, ai-tab | ✅ |
-| R5: `audio-probe.js` `getProxyUrl()` → `return ''` | ✅ |
-| R5: `audio-probe.js` `fetchText` → `/proxy?url=` | ✅ |
-| R5: `audio-probe.js` `fetchBytes` → `/proxy-audio?url=` | ✅ |
-| R5: `isAudioUnlocked()` → `return !!(saved.user)` | ✅ |
-| R5: `updatePillAudio()` proxyUrl branch removed | ✅ |
-| R6: File structure — `public/index.html`, `public/lib/audio-probe.js` | ✅ |
-| R7: `railway.toml` and `package.json` created | ✅ |
-| R8: Proxy config card replaced with simple status card | ✅ |
-| R9: `updateProxyStatus`, `restoreProxy`, proxy handlers removed | ✅ |
+| R1–R9: Railway migration complete | ✅ |
 | F5: `#inline-title-rating-card` + auto-run poll wiring | ✅ |
 | runAIMetrics function body + `#ai-metrics-card` div | ✅ |
 | Description fetch uses `/users?id=` endpoint | ✅ |
+| Issue 1: Tab order — Dashboard · Stream Analysis · Settings | ✅ |
+| Issue 2: Audio batch BATCH=5, 200ms delay between batches | ✅ |
+| Issue 3: Stream length removed from generateFeedback + renderBenchmarkCard | ✅ |
+| Issue 4+5: Settings tab hidden; Audio Analysis moved to Dashboard sub-tab | ✅ |
+| Issue 4+5: AI Analysis panel removed; title-rating elements kept as hidden DOM nodes | ✅ |
+| Issue 6: CCV tier card, CSS, JS (autoEstimateCCVTier, initTierSelector) all removed | ✅ |
 
-### Output files — verified, ready to deploy
-- `public/index.html` ✅ (5226 lines)
-- `public/lib/audio-probe.js` ✅
-- `proxy.js` ✅ (Express, Railway edition)
-- `package.json` ✅
-- `railway.toml` ✅
+### Output files
+- `public/index.html` ✅ (5063 lines)
+- `public/lib/audio-probe.js` ✅ (unchanged)
+- `proxy.js` ✅ (unchanged from last session)
+- `package.json` ✅ (unchanged)
+- `railway.toml` ✅ (unchanged)
 
 ### Not yet done
-- Railway deployment (outside Claude)
 - P1: `loadChannelOverview()` auto-trigger on Dashboard tab open
 - P2: Channel Description Analysis card accessibility before overview loads
 
@@ -153,6 +123,9 @@ Twitch VOD segments = MPEG-TS. Browser can't decode directly.
 1. `proxy.js /proxy-audio` demuxes TS → ADTS/AAC (hand-written TS parser, zero extra deps)
 2. `audio-probe.js` uses Web Audio API → energy curve
 
+### Audio batch throttling
+Dense scan fires 120 segments. BATCH=5 with 200ms delay between batches prevents Railway connection pool exhaustion under load. Previously BATCH=8 with 0ms delay caused intermittent failures.
+
 ### Proxy URL post-migration
 All proxy calls use relative URLs. `getProxyUrl()` returns `''`. `fetchText` → `/proxy?url=`. `fetchBytes` → `/proxy-audio?url=`.
 
@@ -162,11 +135,18 @@ Chat + audio scored independently, merged with 20s dedup. Both signals surfaced 
 ### AI model
 `claude-sonnet-4-6` throughout.
 
-### Title rating
-Auto-fills and auto-runs from VOD title when `runAnalysis` completes. Result polled into `#inline-title-rating-card` (polls `#title-rating-result` every 500ms, max 30s). Settings > AI Analysis keeps title rating card for manual re-runs.
+### Title rating — hidden DOM elements
+`#title-rating-input`, `#title-rating-btn`, `#title-rating-result`, `#title-rating-char` are kept as hidden `display:none` elements inside the Stream Analysis view. The AI Analysis panel was removed but these elements are still referenced by the auto-run polling logic in `runAnalysis`. They live in a hidden div, invisible to users.
 
-### Settings tab visibility
-Settings always visible — not login-gated.
+### Settings tab — hidden not deleted
+Settings tab button has `display:none`. The view and `#inner-settings-audio` shell still exist in DOM so `switchTab('settings')` doesn't throw. Content was moved to Dashboard > Audio Analysis.
+
+### CCV tier — fully removed
+Removed: HTML card, CSS rules, `autoEstimateCCVTier()` function, `initTierSelector()` IIFE, call in `showLoggedIn`. The `ccvTier` key may still exist in some users' localStorage from prior sessions but it's no longer read or written.
+
+### Tab visibility by auth state
+- Logged out: Stream Analysis only (Dashboard hidden, Settings hidden)
+- Logged in: Dashboard · Stream Analysis (Settings still hidden)
 
 ---
 
@@ -180,7 +160,8 @@ Settings always visible — not login-gated.
 | Apr 23 2026 | AI metrics card HTML + JS, runAIFeedback, Step 9, switchSubTab iframe clear, fullscreenchange, tile loader |
 | Apr 24 2026 | Confirmed runAIMetrics + #ai-metrics-card present. UI restructure complete. |
 | Apr 25 2026 | Railway migration decided. R1–R3 (Express proxy, /api/claude, callClaude), F5 (inline title rating) complete. |
-| Apr 25 2026 | R4–R9 all applied and verified from uploaded working files. All output files produced and verified 23/23 checks. |
+| Apr 25 2026 | R4–R9 all applied and verified. All output files produced and verified 23/23 checks. |
+| Apr 25 2026 | Issues 1–6: tab order, audio batch, stream length removal, Settings restructure, CCV tier removal. |
 
 ---
 

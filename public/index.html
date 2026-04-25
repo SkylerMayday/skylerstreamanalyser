@@ -1360,27 +1360,6 @@
   }
 
 
-  .tier-selector {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-  .tier-btn {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--border-strong);
-    background: var(--surface);
-    color: var(--ink-2);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .tier-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .tier-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
-
   .locked-panel {
     background: var(--surface);
     border: 2px dashed var(--border-strong);
@@ -1408,9 +1387,9 @@
       <span>Stream Analyser</span>
     </div>
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="stream-analysis">Stream Analysis</button>
       <button class="tab-btn" data-tab="dashboard" id="tab-dashboard" hidden>Dashboard</button>
-      <button class="tab-btn" data-tab="settings">Settings</button>
+      <button class="tab-btn active" data-tab="stream-analysis">Stream Analysis</button>
+      <button class="tab-btn" data-tab="settings" style="display:none;">Settings</button>
     </nav>
     <div class="header-right">
       <button class="ghost small" id="signin-btn">Sign in with Twitch</button>
@@ -1512,6 +1491,13 @@
           <h2>Title Rating</h2>
           <p class="subtitle" id="inline-title-rating-subtitle" style="margin-bottom:12px;"></p>
           <div id="inline-title-rating-body"></div>
+        </div>
+        <!-- Hidden title-rating elements: used by auto-run JS, not shown in UI (AI Analysis panel removed) -->
+        <div style="display:none;" aria-hidden="true">
+          <input type="text" id="title-rating-input" maxlength="140" />
+          <button id="title-rating-btn"></button>
+          <div id="title-rating-char"></div>
+          <div id="title-rating-result"></div>
         </div>
         <div id="feedback-section" style="display:none;">
           <div class="card">
@@ -1615,6 +1601,7 @@
     <!-- Inner tab bar -->
     <div class="inner-tabs">
       <button class="inner-tab-btn active" data-inner="channel-overview">Channel Overview</button>
+      <button class="inner-tab-btn" data-inner="dashboard-audio">Audio Analysis</button>
       <button class="inner-tab-btn" data-inner="stream-history">Stream History</button>
       <button class="inner-tab-btn" data-inner="checklist">Pre-Stream Checklist</button>
     </div>
@@ -1657,21 +1644,37 @@
       </div>
     </div>
 
-    <!-- ── INNER PANEL: Stream History ── -->
-    <div class="inner-panel" id="inner-stream-history">
+    <!-- ── INNER PANEL: Audio Analysis ── -->
+    <div class="inner-panel" id="inner-dashboard-audio">
+
+      <div id="audio-results-card" class="card" style="display:none;">
+        <h2>Audio echo &amp; doubling probe</h2>
+        <p class="subtitle">15 sampled segments from across the VOD, checked for audio doubling via autocorrelation.</p>
+        <div id="audio-results"></div>
+      </div>
 
       <div class="card">
-        <h2>Your CCV tier</h2>
-        <p class="subtitle">Used to contextualise your metrics against streamers at a similar stage. Pick your typical concurrent viewer count.</p>
-        <div class="tier-selector" id="tier-selector">
-          <button class="tier-btn" data-tier="0-10">0–10 CCV</button>
-          <button class="tier-btn" data-tier="11-50">11–50 CCV</button>
-          <button class="tier-btn" data-tier="51-200">51–200 CCV</button>
-          <button class="tier-btn" data-tier="201-1000">201–1000 CCV</button>
-          <button class="tier-btn" data-tier="1000+">1000+ CCV</button>
+        <h2>Upload a local recording</h2>
+        <p class="subtitle">If the live audio probe fails or you want to analyze your OBS recording directly, upload it here. More accurate since it's your original audio before Twitch re-encodes.</p>
+
+        <div class="notice warn" style="margin-bottom: 14px;">
+          <strong>Browser size limit:</strong> Chrome can't decode files larger than ~2 GB in a single pass — a full-stream OBS recording will fail. If your recording is big, extract just the audio track first (fast, lossless, produces a file ~10% the size):
+          <div style="margin-top: 8px; padding: 10px 12px; background: var(--ink); color: #86efac; border-radius: var(--r-sm); font-family: var(--mono); font-size: 12px; overflow-x: auto;">
+            ffmpeg -i "your-recording.mp4" -vn -c:a copy audio.m4a
+          </div>
+          <div style="font-size: 12px; margin-top: 6px; color: var(--ink-dim);">
+            Don't have ffmpeg? Install with <code>winget install Gyan.FFmpeg</code> in PowerShell, or download from <a href="https://www.gyan.dev/ffmpeg/builds/" target="_blank">gyan.dev/ffmpeg/builds</a>.
+          </div>
         </div>
-        <p style="margin-top: 10px; font-size: 12px; color: var(--ink-faint);" data-tier-note>Saved to your browser. Used to contextualise benchmark metrics against streamers at a similar stage.</p>
+
+        <button class="ghost" id="upload-audio-btn">Choose file (audio or video)</button>
+        <input type="file" id="audio-upload" accept="audio/*,video/*" style="display:none" />
       </div>
+
+    </div>
+
+    <!-- ── INNER PANEL: Stream History ── -->
+    <div class="inner-panel" id="inner-stream-history">
 
       <div class="card">
         <h2>Stream history</h2>
@@ -1718,62 +1721,12 @@
     </div>
 
     <!-- Inner tab bar -->
-    <div class="inner-tabs">
+    <div class="inner-tabs" style="display:none;">
       <button class="inner-tab-btn active" data-inner="settings-audio">Audio Analysis</button>
-      <button class="inner-tab-btn" data-inner="settings-ai">✦ AI Analysis</button>
     </div>
 
-    <!-- ── INNER PANEL: Audio Analysis ── -->
+    <!-- ── INNER PANEL: Audio Analysis (empty — content moved to Dashboard > Audio Analysis) ── -->
     <div class="inner-panel active" id="inner-settings-audio">
-
-      <div class="card">
-        <h2>Audio analysis</h2>
-        <p class="subtitle">Audio features are built-in — no configuration needed. The app fetches and processes Twitch VOD audio automatically via the server.</p>
-        <div class="notice ok" style="margin-top: 8px;">✓ Audio proxy ready — no setup required</div>
-      </div>
-
-      <div id="audio-results-card" class="card" style="display:none;">
-        <h2>Audio echo &amp; doubling probe</h2>
-        <p class="subtitle">15 sampled segments from across the VOD, checked for audio doubling via autocorrelation.</p>
-        <div id="audio-results"></div>
-      </div>
-
-      <div class="card">
-        <h2>Upload a local recording</h2>
-        <p class="subtitle">If the live audio probe fails or you want to analyze your OBS recording directly, upload it here. More accurate since it's your original audio before Twitch re-encodes.</p>
-
-        <div class="notice warn" style="margin-bottom: 14px;">
-          <strong>Browser size limit:</strong> Chrome can't decode files larger than ~2 GB in a single pass — a full-stream OBS recording will fail. If your recording is big, extract just the audio track first (fast, lossless, produces a file ~10% the size):
-          <div style="margin-top: 8px; padding: 10px 12px; background: var(--ink); color: #86efac; border-radius: var(--r-sm); font-family: var(--mono); font-size: 12px; overflow-x: auto;">
-            ffmpeg -i "your-recording.mp4" -vn -c:a copy audio.m4a
-          </div>
-          <div style="font-size: 12px; margin-top: 6px; color: var(--ink-dim);">
-            Don't have ffmpeg? Install with <code>winget install Gyan.FFmpeg</code> in PowerShell, or download from <a href="https://www.gyan.dev/ffmpeg/builds/" target="_blank">gyan.dev/ffmpeg/builds</a>.
-          </div>
-        </div>
-
-        <button class="ghost" id="upload-audio-btn">Choose file (audio or video)</button>
-        <input type="file" id="audio-upload" accept="audio/*,video/*" style="display:none" />
-      </div>
-
-    </div>
-
-    <!-- ── INNER PANEL: AI Analysis ── -->
-    <div class="inner-panel" id="inner-settings-ai">
-
-      <!-- Title Rating -->
-      <div class="card">
-        <h2>Title rating</h2>
-        <p class="subtitle">Rate a stream title for clickability, searchability, and emotional hook. Auto-filled from the last analysed VOD — or type any title to test alternatives.</p>
-        <label>Stream title</label>
-        <div class="row" style="margin-top: 4px; gap: 8px;">
-          <input type="text" id="title-rating-input" placeholder="e.g. I played Minecraft for 24 hours straight" maxlength="140" />
-          <button class="primary" id="title-rating-btn" style="white-space:nowrap;">Rate title</button>
-        </div>
-        <div id="title-rating-char" style="font-size:11px;color:var(--ink-faint);margin-top:4px;text-align:right;">0 / 140</div>
-        <div id="title-rating-result" style="margin-top: 16px; display:none;"></div>
-      </div>
-
     </div>
 
   </div>
@@ -1970,8 +1923,6 @@ function showLoggedIn(user) {
   if (chanInput && !chanInput.value) chanInput.value = user.login;
   // Auto-load their VODs
   loadVodsForChannel(user.login).catch(e => log('VOD load failed: ' + e.message, 'err'));
-  // Attempt CCV tier estimation from chat velocity of recent VODs
-  autoEstimateCCVTier(user.login).catch(() => {});
 }
 
 function showLoggedOut() {
@@ -2007,83 +1958,6 @@ function handleAuthCallback() {
   return true;
 }
 
-// ---- CCV tier auto-estimation ----
-// Twitch deprecated VOD view_count in May 2024 (always returns 0).
-// Best available proxy: sample chat velocity from the user's last 3 VODs
-// and map msg/min → typical CCV tier using the same TIER_BENCHMARKS thresholds.
-// This is a rough heuristic — chat/CCV ratio varies ~5–20× across streamers —
-// but it's directionally correct and far better than nothing.
-// Only fires if no tier is already saved.
-async function autoEstimateCCVTier(channelLogin) {
-  const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-  if (saved.ccvTier) return; // already set — don't override user choice
-
-  try {
-    // Fetch last 3 VODs
-    const vods = await fetchChannelVods(channelLogin);
-    if (!vods.length) return;
-    const recent = vods.slice(0, 3);
-
-    // For each VOD, fetch a single page of chat (first ~40 msgs) to get
-    // a quick velocity estimate from just the first segment of the VOD.
-    // Cheap: 3 GQL calls, no full replay needed.
-    const velocities = [];
-    for (const v of recent) {
-      try {
-        const body = [{
-          operationName: 'VideoCommentsByOffsetOrCursor',
-          variables: { videoID: v.id, contentOffsetSeconds: 0 },
-          extensions: { persistedQuery: {
-            version: 1,
-            sha256Hash: 'b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a'
-          }}
-        }];
-        const j = await gql(body);
-        const res = j[0]?.data?.video?.comments;
-        if (!res) continue;
-        const edges = res.edges || [];
-        if (edges.length < 5) continue;
-        // Measure chat velocity over the window spanned by this page
-        const times = edges.map(e => e.node?.contentOffsetSeconds || 0);
-        const span = Math.max(1, times[times.length - 1] - times[0]);
-        const cpm = (edges.length / span) * 60;
-        if (cpm > 0) velocities.push(cpm);
-      } catch {}
-    }
-    if (!velocities.length) return;
-
-    const avgCpm = velocities.reduce((a, b) => a + b, 0) / velocities.length;
-
-    // Map chat velocity → likely CCV tier.
-    // Rough calibration: ~0.5–2 msg/min per concurrent viewer is typical for
-    // small streamers; ratios compress as channels grow.
-    // These thresholds were chosen so median-engagement streamers land in the
-    // right tier — adjust if you have better data.
-    let estimatedTier;
-    if (avgCpm < 1.5)       estimatedTier = '0-10';
-    else if (avgCpm < 5)    estimatedTier = '11-50';
-    else if (avgCpm < 15)   estimatedTier = '51-200';
-    else if (avgCpm < 50)   estimatedTier = '201-1000';
-    else                    estimatedTier = '1000+';
-
-    const creds = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-    if (creds.ccvTier) return; // double-check in case user set it while we were fetching
-    creds.ccvTier = estimatedTier;
-    creds.ccvTierEstimated = true; // flag so we can show "estimated" label
-    localStorage.setItem('vodDeskCreds', JSON.stringify(creds));
-
-    // Update tier selector UI
-    document.querySelectorAll('.tier-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tier === estimatedTier);
-    });
-    // Update sub-label
-    const note = document.querySelector('[data-tier-note]');
-    if (note) note.textContent = `Auto-estimated from your recent chat velocity (${avgCpm.toFixed(1)} msg/min avg). Override any time.`;
-    log(`CCV tier estimated: ${estimatedTier} (avg chat velocity ${avgCpm.toFixed(1)} msg/min from ${velocities.length} VODs)`, 'ok');
-  } catch (e) {
-    log('CCV tier estimation failed: ' + e.message, 'warn');
-  }
-}
 
 async function bootstrapIfLoggedIn() {
   const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
@@ -2618,13 +2492,6 @@ function renderBenchmarkCard(meta, comments, clips) {
 
   const rows = [
     {
-      label: 'Stream length',
-      value: fmtDurShort(dur),
-      status: durStatus(dur),
-      ranges: '< 30 min · 90 min–4 h sweet spot · 4–8 h marathon',
-      note: 'Twitch discovery algorithms favor streams ≥ 90 min. Under 30 min rarely surfaces in browse.',
-    },
-    {
       label: 'Chat velocity',
       value: cpm.toFixed(1) + ' msg/min',
       status: cpmStatus(cpm),
@@ -2694,11 +2561,6 @@ function generateFeedback(meta, comments, clips, audio) {
   const fb = [];
   const dur = meta.duration;
   const cpm = comments.length / (dur/60);
-
-  // Duration
-  if (dur < 30*60) fb.push(['info', `This was a short stream at <strong>${fmtDurShort(dur)}</strong>. Streams under 30 minutes rarely build audience momentum — Twitch's recommendation system typically needs 90+ minutes to push you to browse pages.`]);
-  else if (dur > 6*3600) fb.push(['info', `A marathon stream at <strong>${fmtDurShort(dur)}</strong>. Energy management matters here — chat engagement usually dips in hours 4+ unless you change segments.`]);
-  else fb.push(['good', `Stream length of <strong>${fmtDurShort(dur)}</strong> is in the sweet spot for Twitch discoverability.`]);
 
   // Chat velocity
   if (cpm < 2) fb.push(['warn', `Chat velocity was <strong>${cpm.toFixed(1)} msg/min</strong> — quiet chat. Consider more direct chat engagement: ask questions, read messages aloud, use chat polls.`]);
@@ -3220,8 +3082,8 @@ async function runDenseAudioScan(vodId, duration, chatClips) {
     const energyCurve = [];
     let done = 0;
 
-    // Fetch in batches of 8 to avoid flooding the proxy
-    const BATCH = 8;
+    // Fetch in batches of 5 to avoid flooding the proxy (Railway drops requests under heavy load)
+    const BATCH = 5;
     for (let b = 0; b < sampled.length; b += BATCH) {
       const batch = sampled.slice(b, b + BATCH);
       await Promise.all(batch.map(async ({ seg, idx }) => {
@@ -3243,8 +3105,8 @@ async function runDenseAudioScan(vodId, duration, chatClips) {
       const pct = Math.round((done / sampled.length) * 100);
       $('#audio-clips-intro').innerHTML =
         `<em style="color:var(--ink-faint)">Scanning audio… ${pct}% (${done}/${sampled.length} segments)</em>`;
-      // Yield to browser between batches
-      await new Promise(r => setTimeout(r, 0));
+      // Throttle between batches: 200ms gives Railway connection pool time to recover
+      await new Promise(r => setTimeout(r, 200));
     }
     ctx.close();
 
@@ -3600,31 +3462,6 @@ document.querySelectorAll('.inner-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchInnerTab(btn.dataset.inner));
 });
 
-// ===============================================
-// CCV tier selector
-// ===============================================
-(function initTierSelector() {
-  const saved = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-  const activeTier = saved.ccvTier || null;
-  document.querySelectorAll('.tier-btn').forEach(btn => {
-    if (btn.dataset.tier === activeTier) btn.classList.add('active');
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const creds = JSON.parse(localStorage.getItem('vodDeskCreds') || '{}');
-      creds.ccvTier = btn.dataset.tier;
-      delete creds.ccvTierEstimated; // manual override clears estimated flag
-      localStorage.setItem('vodDeskCreds', JSON.stringify(creds));
-      const note = document.querySelector('[data-tier-note]');
-      if (note) note.textContent = 'Saved to your browser. Used to contextualise benchmark metrics against streamers at a similar stage.';
-    });
-  });
-  // Restore estimated label if applicable
-  if (saved.ccvTierEstimated && activeTier) {
-    const note = document.querySelector('[data-tier-note]');
-    if (note) note.textContent = `Auto-estimated from your recent chat velocity. Override any time by clicking a tier above.`;
-  }
-})();
 
 // ===============================================
 // Persistence layer
