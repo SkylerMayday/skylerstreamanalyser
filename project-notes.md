@@ -9,32 +9,7 @@
 
 ## ⚠️ PRIORITY — Complete this first (next session)
 
-### Deploy to Railway + post-deployment fixes
-
-All code changes are complete and verified. Output files are ready to deploy.
-
-**Deployment steps (do outside Claude):**
-1. Push all output files to a GitHub repo in this structure:
-   ```
-   proxy.js
-   package.json
-   railway.toml
-   public/
-     index.html
-     lib/
-       audio-probe.js
-   ```
-2. Create a new Railway service pointing to the repo
-3. Set env var: `ANTHROPIC_API_KEY` in Railway service settings
-4. Confirm deploy succeeds and app loads at the Railway URL
-5. Test: sign in, run a VOD analysis, confirm audio works + AI features work
-
-**Post-deployment fixes (implement in next session after Railway confirmed):**
-
-| # | Item | Notes |
-|---|---|---|
-| P1 | `loadChannelOverview()` trigger on Dashboard entry | Currently only fires on inner-tab click. Should also fire when user first opens Dashboard tab while logged in. Add call in `showLoggedIn` or the Dashboard tab click handler. Guard with a `let overviewLoaded = false` flag. |
-| P2 | Channel Description Analysis card placement | `#channel-desc-card` is inside `#channel-overview-content` which is hidden until `loadChannelOverview` populates it. Either move it outside as a standalone card, or confirm P1 fix makes it accessible in time. |
+No outstanding priority items. App is live and working. Collect user feedback before next round of fixes.
 
 ---
 
@@ -57,15 +32,16 @@ public/
 | `window.__activeStudioTab` | Currently visible studio tab (`'highscore'`, `'chat'`, `'audio'`, or `null`) |
 | `window.__studioTabLoader` | Map of tabKey → `function(autoplay)` — set by `renderStudioClips` |
 | `window.__energyCurve` | Audio energy array from the last probe, used by sparkline |
-| `localStorage['vodDeskCreds']` | `{ clientId, accessToken, login, userId }` — no claudeKey, no proxyUrl post-migration |
+| `localStorage['vodDeskCreds']` | `{ client, token, user }` — client always persisted now, no claudeKey, no proxyUrl |
 
 ### Auth model
-- Twitch: implicit OAuth flow. Token stored in localStorage. `isAudioUnlocked()` = logged in.
+- Twitch: implicit OAuth flow. Token + clientId stored in localStorage. `isAudioUnlocked()` = logged in.
 - Claude AI: server-side key (`ANTHROPIC_API_KEY` env var). `isAIUnlocked()` = always `true`.
 - History saves only for own-channel analyses (`loggedInLogin === channelName`).
+- OAuth scopes: `user:read:email channel:read:subscriptions bits:read`
 
 ### AI call convention
-- All Claude calls use model `claude-sonnet-4-6`, `max_tokens` 800–900.
+- All Claude calls use model `claude-sonnet-4-6`, `max_tokens` 1000.
 - All expect JSON back. System prompt says "return ONLY valid JSON".
 - Pattern: fire background, `.catch(e => log(..., 'warn'))` — never block UI.
 - All calls go through `POST /api/claude` relay on the Express server.
@@ -73,13 +49,14 @@ public/
 - `callClaude()` sends `{ system, user, maxTokens }`. Proxy reads the same fields.
 
 ### Tab structure
-- **Top tabs:** Dashboard (login-gated) · Stream Analysis · Settings
-- **Dashboard sub-tabs:** Channel Overview · Stream History · Pre-Stream Checklist
-- **Settings sub-tabs:** Audio Analysis · AI Analysis
-- **Stream Analysis results:** VOD metadata → inline-title-rating-card → benchmark-card → ai-metrics-card → feedback-list
+- **Top tabs (logged out):** Stream Analysis only
+- **Top tabs (logged in):** Dashboard · Stream Analysis
+- **Settings tab:** hidden (`display:none`) — not accessible from UI
+- **Dashboard sub-tabs:** Channel Overview · Audio Analysis · Stream History · Pre-Stream Checklist
+- **Dashboard > Channel Overview cards:** Follower metrics · Schedule consistency · Subscribers · Bits · Channel description analysis · Discoverability audit · Community protection
+- **Stream Analysis results:** VOD metadata → inline-title-rating-card → benchmark-card → bitrate-card → ai-metrics-card → feedback-list
 - **Sub-tabs inside Stream Analysis results:** Analysis · Studio
-- **Settings > Audio Analysis:** simple "no config needed" card + echo probe card + local upload card
-- **Settings > AI Analysis:** title rating card only (no key input)
+- **Studio sub-tabs:** High Score · Chat-Spike · Audio-Peak
 
 ### Key function map
 | Function | Purpose |
@@ -91,82 +68,123 @@ public/
 | `generateFeedback` / `generateImprovementNotes` | Rule-based notes |
 | `runAIImprovementNotes` / `runAIFeedback` / `runAIMetrics` | AI background steps 7/8/9 |
 | `runAIChecklistSynthesis` | AI checklist for History tab |
+| `runTitleRating(title, targetEl)` | Shared title rating — auto-run, Rate button, alt clicks |
 | `callClaude(system, user, maxTokens)` | POSTs to `/api/claude` relay |
-| `renderBenchmarkCard` | Benchmark stats card |
+| `renderBenchmarkCard(meta, comments, clips)` | Benchmark stats card |
+| `fetchAndRenderBitrateCard(vodId)` | HLS manifest → quality levels card |
+| `fetchVodClipCount(vodId)` | Helix clip count → re-renders benchmark + feedback |
+| `loadSubCount(userId, client, token)` | Subscriber count + tier proxy → Dashboard |
+| `loadBits(userId, client, token)` | Bits total + leaderboard → Dashboard |
+| `runDiscoverabilityAudit()` | AI audit of title/category/tags/description |
 | `switchSubTab` / `switchStudioTab` | Tab switching + iframe management |
-| `loadChannelOverview` | Followers, schedule, recent VODs |
+| `loadChannelOverview` | Followers, schedule, subs, bits, recent VODs |
 
 ---
 
-## 2. Current state (as of session: 25 Apr 2026)
+## 2. Current state (as of session: 26 Apr 2026)
 
-### Migration complete — all changes verified ✅
+### All changes complete ✅
 
 | Change | Status |
 |---|---|
-| R1: `proxy.js` rewritten as Express app | ✅ |
-| R2: `/api/claude` POST route + rate limiting | ✅ |
-| R3: `callClaude()` POSTs to `/api/claude` relay | ✅ |
-| R4: Claude API key UI + JS fully removed | ✅ |
-| R4: `isAIUnlocked()` → `return true` | ✅ |
-| R4: `isAIUnlocked()` guards removed from title-rating, desc-analysis, ai-tab | ✅ |
-| R5: `audio-probe.js` `getProxyUrl()` → `return ''` | ✅ |
-| R5: `audio-probe.js` `fetchText` → `/proxy?url=` | ✅ |
-| R5: `audio-probe.js` `fetchBytes` → `/proxy-audio?url=` | ✅ |
-| R5: `isAudioUnlocked()` → `return !!(saved.user)` | ✅ |
-| R5: `updatePillAudio()` proxyUrl branch removed | ✅ |
-| R6: File structure — `public/index.html`, `public/lib/audio-probe.js` | ✅ |
-| R7: `railway.toml` and `package.json` created | ✅ |
-| R8: Proxy config card replaced with simple status card | ✅ |
-| R9: `updateProxyStatus`, `restoreProxy`, proxy handlers removed | ✅ |
-| F5: `#inline-title-rating-card` + auto-run poll wiring | ✅ |
-| runAIMetrics function body + `#ai-metrics-card` div | ✅ |
-| Description fetch uses `/users?id=` endpoint | ✅ |
+| Railway migration (R1–R9) | ✅ |
+| Issues 1–6: tab order, audio batch, stream length, Settings restructure, CCV tier removal | ✅ |
+| Audio decode fix: direct AAC first, transmux fallback | ✅ |
+| Title rating: maxTokens 1000, shared function, alt clicks rate inline | ✅ |
+| P1+P2: loadChannelOverview auto-fires on Dashboard open | ✅ |
+| Studio tab highlight bug fixed (classList.toggle) | ✅ |
+| Studio tabs clickable (click wiring was crashing due to parse-time DOM access) | ✅ |
+| Sub count + tier card in Dashboard Channel Overview | ✅ |
+| Bits leaderboard card in Dashboard Channel Overview | ✅ |
+| Bitrate card in Stream Analysis (from HLS manifest) | ✅ |
+| OAuth scopes: added `channel:read:subscriptions bits:read` | ✅ |
+| Clip creation rate: Helix fetch, re-renders benchmark + feedback | ✅ |
+| Cold open / outro quality in benchmark + feedback | ✅ |
+| Sub/VIP/mod chat share in benchmark + feedback | ✅ |
+| Stream pacing (longest dead stretch) in benchmark + feedback | ✅ |
+| Discoverability audit card (AI-powered, Dashboard) | ✅ |
+| Hype train optimisation advice card (Dashboard) | ✅ |
+| Hate raid defence + bot removal advice card (Dashboard) | ✅ |
+| CSP headers in proxy.js (allows mux.js eval + CDN) | ✅ |
+| Auth fix: DEFAULT_CLIENT_ID now persisted to localStorage on sign-in | ✅ |
+| Auth fix: bootstrapIfLoggedIn uses getClientId() not saved.client | ✅ |
+| Stray </div> closing main early — removed | ✅ |
+| Syntax fix: unescaped apostrophe in single-quoted string | ✅ |
 
-### Output files — verified, ready to deploy
-- `public/index.html` ✅ (5226 lines)
+### Output files (deployed, confirmed matching)
+- `public/index.html` ✅ (5565 lines)
 - `public/lib/audio-probe.js` ✅
-- `proxy.js` ✅ (Express, Railway edition)
-- `package.json` ✅
-- `railway.toml` ✅
-
-### Not yet done
-- Railway deployment (outside Claude)
-- P1: `loadChannelOverview()` auto-trigger on Dashboard tab open
-- P2: Channel Description Analysis card accessibility before overview loads
+- `proxy.js` ✅ (CSP headers added)
+- `package.json` ✅ (unchanged)
+- `railway.toml` ✅ (unchanged)
 
 ---
 
 ## 3. Decisions & context
 
-### Hosting — Railway (new service in existing project)
+### Hosting — Railway
 Same Railway account, same project, separate service. Stays within $5/month Hobby plan.
 
 ### Claude API key — server-side
 Key in Railway env var `ANTHROPIC_API_KEY`. Never sent to client. All calls relay through `POST /api/claude`. Rate limiting: 10/IP/hr in-memory, no Redis needed.
 
-### callClaude ↔ proxy field names
-`callClaude` sends `{ system, user, maxTokens }`. Proxy `/api/claude` reads `{ system, user, maxTokens }` and passes to Anthropic as `messages: [{ role: 'user', content: user }]`. Proxy returns full Anthropic response object; `callClaude` extracts text via `.content.filter(b => b.type === 'text').map(b => b.text).join('')`.
+### Auth — DEFAULT_CLIENT_ID persistence
+`DEFAULT_CLIENT_ID` is baked into the app. On first sign-in it's now always written to `localStorage['vodDeskCreds'].client` before the OAuth redirect. `bootstrapIfLoggedIn` uses `getClientId()` which falls back to `DEFAULT_CLIENT_ID` if `saved.client` is missing — covers users with stale localStorage from before this fix.
 
-### Audio decode
-Twitch VOD segments = MPEG-TS. Browser can't decode directly.
-1. `proxy.js /proxy-audio` demuxes TS → ADTS/AAC (hand-written TS parser, zero extra deps)
-2. `audio-probe.js` uses Web Audio API → energy curve
+### CSP
+Railway doesn't set a CSP by default but browsers enforce stricter policies in some contexts. `proxy.js` now sets an explicit CSP on all responses allowing `unsafe-eval` (mux.js), `cdn.jsdelivr.net`, Twitch domains, and `unsafe-inline` styles.
 
-### Proxy URL post-migration
-All proxy calls use relative URLs. `getProxyUrl()` returns `''`. `fetchText` → `/proxy?url=`. `fetchBytes` → `/proxy-audio?url=`.
+### Audio decode — direct first, transmux fallback
+`proxy.js /proxy-audio` demuxes TS → ADTS/AAC server-side. `decodeSegment` tries `ctx.decodeAudioData()` directly first. Only falls back to mux.js transmux if direct decode fails.
+
+### Audio batch throttling
+BATCH=5 with 200ms delay between batches. Previously BATCH=8 with 0ms caused Railway connection pool exhaustion.
 
 ### Clip scoring
-Chat + audio scored independently, merged with 20s dedup. Both signals surfaced in detail panel.
+Chat + audio scored independently, merged with 20s dedup.
 
-### AI model
-`claude-sonnet-4-6` throughout.
+### AI model + token budget
+`claude-sonnet-4-6` throughout. `max_tokens: 1000` for title rating and discoverability audit. Other calls 800–900.
 
-### Title rating
-Auto-fills and auto-runs from VOD title when `runAnalysis` completes. Result polled into `#inline-title-rating-card` (polls `#title-rating-result` every 500ms, max 30s). Settings > AI Analysis keeps title rating card for manual re-runs.
+### Title rating — shared function
+`runTitleRating(title, targetEl)` used in three places: auto-run, Rate button, alt clicks. Alt clicks rate inline below current result, chainable.
 
-### Settings tab visibility
-Settings always visible — not login-gated.
+### Title rating — hidden DOM elements
+`#title-rating-input`, `#title-rating-btn`, `#title-rating-result`, `#title-rating-char` kept as hidden elements. No longer functionally needed but kept to avoid null-reference errors.
+
+### Settings tab — hidden not deleted
+Tab button has `display:none`. Shell still exists so `switchTab('settings')` doesn't throw.
+
+### Sub count — points proxy for tier breakdown
+`/subscriptions` returns `total` and `points`. Points ÷ subs = avg tier proxy (T1=1.0 baseline).
+
+### Bits — all-time via leaderboard
+`/bits/leaderboard?period=all` returns total + top 5 cheerers. No per-stream breakdown available.
+
+### Bitrate card — from HLS manifest
+Fetches master playlist via proxy, parses BANDWIDTH/RESOLUTION/NAME per variant. Background step after analysis.
+
+### Clip creation rate — background Helix fetch
+`fetchVodClipCount` fires after analysis completes, re-renders benchmark card and feedback list with `meta.twitchClipCount` injected.
+
+### Discoverability audit
+Fetches channel title, category, tags, description from Helix then sends to Claude. Returns score + 5 dimensions + wins/issues/actions. Re-runnable.
+
+### Historical CCV — decided against
+TwitchTracker scraping only, fragile, widens proxy attack surface. Not worth it.
+
+### StreamElements tips — decided against
+Requires separate SE OAuth flow and token management. Disproportionate complexity.
+
+### Tab visibility by auth state
+- Logged out: Stream Analysis only
+- Logged in: Dashboard · Stream Analysis
+
+### loadChannelOverview auto-trigger
+`overviewLoaded` flag prevents repeated calls on every tab switch. Resets on page reload.
+
+### Re-auth required for new scopes
+Users who signed in before the scope addition need to sign out and back in once. Sub/bits cards show a friendly prompt if token predates the new scopes.
 
 ---
 
@@ -174,33 +192,34 @@ Settings always visible — not login-gated.
 
 | Date | What changed |
 |---|---|
-| Early sessions | Initial app: Twitch login, VOD list, chat fetch, basic clip scoring, proxy v1 |
+| Early sessions | Initial app: login, VOD list, chat fetch, clip scoring, proxy v1 |
 | Mid sessions | Audio probe, proxy v2 (TS demux), dense scan, studio tabs, tile player |
-| Apr 22 2026 | AI features: improvement notes, checklist synthesis, title rating (AI panel) |
-| Apr 23 2026 | AI metrics card HTML + JS, runAIFeedback, Step 9, switchSubTab iframe clear, fullscreenchange, tile loader |
-| Apr 24 2026 | Confirmed runAIMetrics + #ai-metrics-card present. UI restructure complete. |
-| Apr 25 2026 | Railway migration decided. R1–R3 (Express proxy, /api/claude, callClaude), F5 (inline title rating) complete. |
-| Apr 25 2026 | R4–R9 all applied and verified from uploaded working files. All output files produced and verified 23/23 checks. |
+| Apr 22 2026 | AI features: improvement notes, checklist synthesis, title rating |
+| Apr 23 2026 | AI metrics card, runAIFeedback, Step 9, iframe management, tile loader |
+| Apr 24 2026 | UI restructure complete |
+| Apr 25 2026 | Railway migration (R1–R9), inline title rating |
+| Apr 25 2026 | Issues 1–6: tab order, audio batch, stream length, Settings, CCV tier |
+| Apr 25 2026 | Audio decode fix. Title rating refactored. P1+P2 resolved. Alt clicks rate inline. |
+| Apr 25 2026 | Studio tab highlight fix. Sub/bits/bitrate cards. New benchmark metrics. Discoverability + protection cards. |
+| Apr 26 2026 | CSP fix (proxy.js). Auth fix (DEFAULT_CLIENT_ID persistence). Stray div fix. Apostrophe syntax fix. App confirmed live. |
 
 ---
 
 ## 5. Backlog — do NOT implement until explicitly asked
 
-### New metrics / signals
-- Clip creation rate — Helix `/clips?video_id=`
-- First-time chatter rate, emote-only ratio, sub/VIP/mod share
-- Question detection, hype train, hate raid, lurker conversion
-- Stream stability, bot presence, clip virality
-- Cold open quality, stream pacing, outro quality
-- Chatter growth, head-to-head comparison, follower conversion
-- Discoverability/searchability audit, raid target finder, tag audit
-- Optimal streaming window, highlights tracking
+### KIV
+- Head-to-head channel comparison — significant UI work
+- IndexedDB migration — only matters when history gets large (current limit: 50 VODs)
+- Shareable report — needs export/hosting solution
 
-### Integrations needing extra OAuth scopes
-- Sub count/tier — `channel:read:subscriptions`
-- Bits — `bits:read`
-- StreamElements, TwitchTracker, bitrate from manifests
-
-### Infrastructure
-- IndexedDB migration (KIV)
-- Shareable report (KIV — more feasible post-Railway)
+### Decided against — do not revisit unless explicitly asked
+- Historical CCV via TwitchTracker — scraping only, fragile, widens proxy allowlist
+- StreamElements tips/donations — separate OAuth flow, disproportionate complexity
+- Emote-only ratio — requires emote registry API, fiddly
+- Question detection — NLP needed, burns rate limit on 5000+ messages
+- Hype train detection — requires EventSub/webhooks, not available via VOD polling
+- Hate raid detection — requires real-time monitoring, not VOD analysis
+- Lurker conversion — no data source
+- Bot presence — external dependency (known bot lists)
+- Clip virality — needs time-series polling across days
+- Chatter growth / follower conversion — needs historical per-stream data we don't store
